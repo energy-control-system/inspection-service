@@ -1,0 +1,70 @@
+name: Docker Build & Deploy
+
+on:
+  push:
+    branches: [ master ]
+
+env:
+  CONTAINER_NAME: inspection-service
+  CONTAINER_PORT: 80
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Get short SHA
+        id: vars
+        run: echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+      - name: Build Docker Image with unique tag
+        run: |
+          docker build -t $CONTAINER_NAME:${{ env.SHORT_SHA }} .
+
+      - name: Stop and remove containers using old images of the same container (excluding current)
+        run: |
+          # Get containers using $CONTAINER_NAME images excluding current SHA
+          docker ps -a --filter "name=$CONTAINER_NAME-*" --format '{{.ID}} {{.Image}}' | while read container_id image_ref; do
+            image_tag=$(echo "$image_ref" | cut -d':' -f2)
+            if [ "$image_tag" != "${{ env.SHORT_SHA }}" ]; then
+              echo "Stopping and removing container $container_id using old image $image_ref"
+              docker stop "$container_id" || true
+              docker rm "$container_id" || true
+            fi
+          done
+
+      - name: Run new container
+        env:
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+        run: |
+          docker run -d --name $CONTAINER_NAME-${{ env.SHORT_SHA }} --network=backend -e ENV=prod -e POSTGRES_PASSWORD=$POSTGRES_PASSWORD -p $CONTAINER_PORT:$CONTAINER_PORT $CONTAINER_NAME:${{ env.SHORT_SHA }}
+
+      - name: Remove old images of the same container (keep current)
+        run: |
+          docker images --filter "reference=$CONTAINER_NAME:*" --format '{{.Repository}}:{{.Tag}}' | \
+          grep -v ":${{ env.SHORT_SHA }}" | \
+          xargs -r docker rmi -f
+
+      - name: Remove stopped containers with same name pattern
+        run: |
+          docker ps -a --filter "name=$CONTAINER_NAME-*" --filter "status=exited" -q | \
+          xargs -r docker rm
+
+      - name: Truncate container logs
+        run: |
+          CONTAINER_ID=$(docker ps -qf "name=$CONTAINER_NAME-${{ env.SHORT_SHA }}")
+          if [ -n "$CONTAINER_ID" ]; then
+            LOG_FILE="/var/lib/docker/containers/$CONTAINER_ID/${CONTAINER_ID}-json.log"
+            if [ -f "$LOG_FILE" ]; then
+              sudo truncate -s 0 "$LOG_FILE"
+            fi
+          fi
+
+      - name: Cleanup unused Docker resources
+        run: docker system prune -f --volumes
+
+      - name: Cleanup old dangling images
+        run: docker image prune -f

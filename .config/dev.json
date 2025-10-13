@@ -1,0 +1,26 @@
+{
+  "port": 80,
+  "databases": {
+    "postgres": "postgres://postgres:%s@postgres:5432/inspection_service?sslmode=disable",
+    "kafka": {
+      "brokers": [
+        "kafka:9093"
+      ],
+      "topics": {
+        "inspections": "inspections-topic",
+        "tasks": "tasks-topic"
+      }
+    }
+  },
+  "cluster": {
+    "analyzerService": "http://analyzer-service",
+    "brigadeService": "http://brigade-service",
+    "fileService": "http://file-service",
+    "subscriberService": "http://subscriber-service",
+    "taskService": "http://task-service"
+  },
+  "templates": {
+    "universal": "./service/inspection/templates/universal_act.docx",
+    "control": "./service/inspection/templates/control_act.docx"
+  }
+}

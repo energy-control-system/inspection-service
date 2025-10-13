@@ -1,0 +1,23 @@
+select id,
+       task_id,
+       status,
+       type,
+       resolution,
+       limit_reason,
+       method,
+       method_by,
+       reason_type,
+       reason_description,
+       is_restriction_checked,
+       is_violation_detected,
+       is_expense_available,
+       violation_description,
+       is_unauthorized_consumers,
+       unauthorized_description,
+       unauthorized_explanation,
+       inspect_at,
+       energy_action_at,
+       created_at,
+       updated_at
+from inspections
+where id = $1;
