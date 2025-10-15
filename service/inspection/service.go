@@ -6,13 +6,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"inspection-service/cluster/analyzer"
 	"inspection-service/cluster/brigade"
 	"inspection-service/cluster/file"
 	"inspection-service/cluster/subscriber"
 	"inspection-service/cluster/task"
 	"inspection-service/config"
-	"inspection-service/database/inspection"
 	"io"
 	"path/filepath"
 	"strings"
@@ -29,37 +27,37 @@ import (
 const kafkaSubscribeTimeout = 2 * time.Minute
 
 type Service struct {
-	inspectionRepository *inspection.Postgres
-	inspectionPublisher  *Publisher
-	analyzerClient       *analyzer.Client
-	subscriberClient     *subscriber.Client
-	fileClient           *file.Client
-	taskClient           *task.Client
-	brigadeClient        *brigade.Client
-	templates            config.Templates
+	repository        Repository
+	publisher         *Publisher
+	analyzerService   AnalyzerService
+	subscriberService SubscriberService
+	fileService       FileService
+	taskService       TaskService
+	brigadeService    BrigadeService
+	templates         config.Templates
 }
 
-func NewService(inspectionRepository *inspection.Postgres, inspectionPublisher *Publisher, analyzerClient *analyzer.Client,
-	subscriberClient *subscriber.Client, fileClient *file.Client, taskClient *task.Client, brigadeClient *brigade.Client, templates config.Templates) *Service {
+func NewService(repository Repository, publisher *Publisher, analyzerService AnalyzerService, subscriberService SubscriberService, fileService FileService,
+	taskService TaskService, brigadeService BrigadeService, templates config.Templates) *Service {
 	return &Service{
-		inspectionRepository: inspectionRepository,
-		inspectionPublisher:  inspectionPublisher,
-		analyzerClient:       analyzerClient,
-		subscriberClient:     subscriberClient,
-		fileClient:           fileClient,
-		taskClient:           taskClient,
-		brigadeClient:        brigadeClient,
-		templates:            templates,
+		repository:        repository,
+		publisher:         publisher,
+		analyzerService:   analyzerService,
+		subscriberService: subscriberService,
+		fileService:       fileService,
+		taskService:       taskService,
+		brigadeService:    brigadeService,
+		templates:         templates,
 	}
 }
 
 func (s *Service) GetByTaskID(ctx goctx.Context, taskID int) (Inspection, error) {
-	dbIns, err := s.inspectionRepository.GetByTaskID(ctx, taskID)
+	ins, err := s.repository.GetByTaskID(ctx, taskID)
 	if err != nil {
 		return Inspection{}, fmt.Errorf("get inspection by task id: %w", err)
 	}
 
-	return MapFromDB(dbIns), nil
+	return ins, nil
 }
 
 func (s *Service) AttachPhoto(ctx goctx.Context, log golog.Logger, request AttachPhotoRequest) (Attachment, error) {
@@ -84,7 +82,7 @@ func (s *Service) AttachPhoto(ctx goctx.Context, log golog.Logger, request Attac
 		return Attachment{}, fmt.Errorf("copy file: %w", err)
 	}
 
-	processedImage, err := s.analyzerClient.ProcessImage(ctx, request.FileHeader.Filename, bytes.NewReader(fileBuffer.Bytes()))
+	processedImage, err := s.analyzerService.ProcessImage(ctx, request.FileHeader.Filename, bytes.NewReader(fileBuffer.Bytes()))
 	if err != nil {
 		return Attachment{}, fmt.Errorf("process image: %w", err)
 	}
@@ -96,9 +94,9 @@ func (s *Service) AttachPhoto(ctx goctx.Context, log golog.Logger, request Attac
 	var object subscriber.ObjectExtended
 	switch request.Type {
 	case AttachmentTypeDevicePhoto:
-		object, err = s.subscriberClient.GetObjectExtendedByDevice(ctx, request.DeviceID)
+		object, err = s.subscriberService.GetObjectExtendedByDevice(ctx, request.DeviceID)
 	case AttachmentTypeSealPhoto:
-		object, err = s.subscriberClient.GetObjectExtendedBySeal(ctx, request.SealID)
+		object, err = s.subscriberService.GetObjectExtendedBySeal(ctx, request.SealID)
 	default:
 		return Attachment{}, fmt.Errorf("invalid attachment type: %d", request.Type)
 	}
@@ -121,21 +119,17 @@ func (s *Service) AttachPhoto(ctx goctx.Context, log golog.Logger, request Attac
 		filepath.Ext(request.FileHeader.Filename),
 	)
 
-	uploadedFile, err := s.fileClient.Upload(ctx, fileName, bytes.NewReader(fileBuffer.Bytes()))
+	uploadedFile, err := s.fileService.Upload(ctx, fileName, bytes.NewReader(fileBuffer.Bytes()))
 	if err != nil {
 		return Attachment{}, fmt.Errorf("upload file: %w", err)
 	}
 
-	dbAttachment, err := s.inspectionRepository.AddAttachment(ctx, inspection.Attachment{
-		InspectionID: request.InspectionID,
-		Type:         int(request.Type),
-		FileID:       uploadedFile.ID,
-	})
+	attachment, err := s.repository.AddAttachment(ctx, request.InspectionID, uploadedFile.ID, request.Type)
 	if err != nil {
 		return Attachment{}, fmt.Errorf("add attachment: %w", err)
 	}
 
-	return MapAttachmentFromDB(dbAttachment), nil
+	return attachment, nil
 }
 
 func attachmentName(t AttachmentType) string {
@@ -177,26 +171,26 @@ func attachmentNumber(request AttachPhotoRequest, object subscriber.ObjectExtend
 }
 
 func (s *Service) FinishInspection(ctx goctx.Context, log golog.Logger, request FinishInspectionRequest) (file.File, error) {
-	dbIns, err := s.inspectionRepository.GetByID(ctx, request.ID)
+	ins, err := s.repository.GetByID(ctx, request.ID)
 	if err != nil {
 		return file.File{}, fmt.Errorf("get inspection by id: %w", err)
 	}
 
-	tsk, err := s.taskClient.GetTaskByID(ctx, dbIns.TaskID)
+	tsk, err := s.taskService.GetTaskByID(ctx, ins.TaskID)
 	if err != nil {
 		return file.File{}, fmt.Errorf("get task by id: %w", err)
 	}
 
 	if tsk.BrigadeID == nil {
-		return file.File{}, fmt.Errorf("task %d has no brigade", dbIns.TaskID)
+		return file.File{}, fmt.Errorf("task %d has no brigade", ins.TaskID)
 	}
 
-	brig, err := s.brigadeClient.GetBrigadeByID(ctx, *tsk.BrigadeID)
+	brig, err := s.brigadeService.GetBrigadeByID(ctx, *tsk.BrigadeID)
 	if err != nil {
 		return file.File{}, fmt.Errorf("get brigade by id: %w", err)
 	}
 
-	object, err := s.subscriberClient.GetObjectExtendedByID(ctx, tsk.ObjectID)
+	object, err := s.subscriberService.GetObjectExtendedByID(ctx, tsk.ObjectID)
 	if err != nil {
 		return file.File{}, fmt.Errorf("get object extended: %w", err)
 	}
@@ -210,7 +204,7 @@ func (s *Service) FinishInspection(ctx goctx.Context, log golog.Logger, request 
 	case TypeLimitation, TypeResumption:
 		buf, err = s.generateUniversalAct(request, brig, object)
 	case TypeVerification, TypeUnauthorizedConnection:
-		devices, dErr := s.inspectionRepository.GetPreviousDeviceInspections(ctx, object.Devices[0].ID, request.ID)
+		devices, dErr := s.repository.GetPreviousDeviceInspections(ctx, object.Devices[0].ID, request.ID)
 		if dErr != nil {
 			return file.File{}, fmt.Errorf("get device inspections: %w", dErr)
 		}
@@ -237,79 +231,27 @@ func (s *Service) FinishInspection(ctx goctx.Context, log golog.Logger, request 
 		object.Address,
 	)
 
-	uploadedFile, err := s.fileClient.Upload(ctx, actName, buf)
+	uploadedFile, err := s.fileService.Upload(ctx, actName, buf)
 	if err != nil {
 		return file.File{}, fmt.Errorf("upload file: %w", err)
 	}
 
-	_, err = s.inspectionRepository.AddAttachment(ctx, inspection.Attachment{
-		InspectionID: dbIns.ID,
-		Type:         int(AttachmentTypeAct),
-		FileID:       uploadedFile.ID,
-	})
+	_, err = s.repository.AddAttachment(ctx, ins.ID, uploadedFile.ID, AttachmentTypeAct)
 	if err != nil {
 		return file.File{}, fmt.Errorf("add attachment: %w", err)
 	}
 
-	devices := make([]inspection.InspectedDevice, 0, len(request.InspectedDevices))
-	seals := make([]inspection.InspectedSeal, 0, len(request.InspectedDevices))
-	for _, device := range request.InspectedDevices {
-		devices = append(devices, inspection.InspectedDevice{
-			DeviceID:     device.DeviceID,
-			InspectionID: dbIns.ID,
-			Value:        device.Value,
-			Consumption:  device.Consumption,
-		})
-
-		for _, seal := range device.InspectedSeals {
-			seals = append(seals, inspection.InspectedSeal{
-				SealID:       seal.SealID,
-				InspectionID: dbIns.ID,
-				IsBroken:     seal.IsBroken,
-			})
-		}
-	}
-
-	err = s.inspectionRepository.AddDevices(ctx, devices)
+	err = s.repository.AddInspectedDevices(ctx, ins.ID, request.InspectedDevices)
 	if err != nil {
-		return file.File{}, fmt.Errorf("add devices: %w", err)
+		return file.File{}, fmt.Errorf("add inspected devices: %w", err)
 	}
 
-	err = s.inspectionRepository.AddSeals(ctx, seals)
-	if err != nil {
-		return file.File{}, fmt.Errorf("add seals: %w", err)
-	}
-
-	var (
-		insType    = int(request.Type)
-		resolution = int(request.Resolution)
-		methodBy   = int(request.MethodBy)
-		reasonType = int(request.ReasonType)
-	)
-	dbIns, err = s.inspectionRepository.FinishInspection(ctx, inspection.Inspection{
-		ID:                      dbIns.ID,
-		TaskID:                  dbIns.TaskID,
-		Type:                    &insType,
-		Resolution:              &resolution,
-		LimitReason:             request.LimitReason,
-		Method:                  &request.Method,
-		MethodBy:                &methodBy,
-		ReasonType:              &reasonType,
-		ReasonDescription:       request.ReasonDescription,
-		IsRestrictionChecked:    &request.IsRestrictionChecked,
-		IsViolationDetected:     &request.IsViolationDetected,
-		IsExpenseAvailable:      &request.IsExpenseAvailable,
-		ViolationDescription:    request.ViolationDescription,
-		IsUnauthorizedConsumers: &request.IsUnauthorizedConsumers,
-		UnauthorizedDescription: request.UnauthorizedDescription,
-		UnauthorizedExplanation: request.UnauthorizedExplanation,
-		EnergyActionAt:          &request.EnergyActionAt,
-	})
+	ins, err = s.repository.FinishInspection(ctx, request)
 	if err != nil {
 		return file.File{}, fmt.Errorf("finish inspection: %w", err)
 	}
 
-	go s.inspectionPublisher.Publish(ctx, log, EventTypeFinish, MapFromDB(dbIns))
+	go s.publisher.Publish(ctx, log, EventTypeFinish, ins)
 
 	return uploadedFile, nil
 }
@@ -465,7 +407,7 @@ func (s *Service) generateUniversalAct(request FinishInspectionRequest, brig bri
 	return buf, nil
 }
 
-func (s *Service) generateControlAct(request FinishInspectionRequest, brig brigade.Brigade, object subscriber.ObjectExtended, devices []inspection.InspectedDevice) (*bytes.Buffer, error) {
+func (s *Service) generateControlAct(request FinishInspectionRequest, brig brigade.Brigade, object subscriber.ObjectExtended, devices []InspectedDevice) (*bytes.Buffer, error) {
 	now := gotime.MoscowNow()
 
 	isVerification := "☒"
@@ -561,7 +503,7 @@ func (s *Service) generateControlAct(request FinishInspectionRequest, brig briga
 		return nil, fmt.Errorf("invalid device place: %d", device.PlaceType)
 	}
 
-	oldDevice := inspection.InspectedDevice{
+	oldDevice := InspectedDevice{
 		Value:     decimal.Zero,
 		CreatedAt: now,
 	}
@@ -774,12 +716,12 @@ func (s *Service) handleStartedTask(ctx context.Context, log golog.Logger, t tas
 		return fmt.Errorf("invalid task status: %v", t.Status)
 	}
 
-	dbIns, err := s.inspectionRepository.StartInspection(ctx, t.ID)
+	ins, err := s.repository.StartInspection(ctx, t.ID)
 	if err != nil {
 		return fmt.Errorf("start inspection: %v", err)
 	}
 
-	go s.inspectionPublisher.Publish(goctx.Wrap(ctx), log, EventTypeStart, MapFromDB(dbIns))
+	go s.publisher.Publish(goctx.Wrap(ctx), log, EventTypeStart, ins)
 
 	return nil
 }

@@ -55,6 +55,25 @@ type Inspection struct {
 	UpdatedAt               time.Time  `db:"updated_at"`
 }
 
+type FinishInspectionRequest struct {
+	ID                      int       `db:"id"`
+	Type                    int       `db:"type"`
+	Resolution              int       `db:"resolution"`
+	LimitReason             *string   `db:"limit_reason"`
+	Method                  string    `db:"method"`
+	MethodBy                int       `db:"method_by"`
+	ReasonType              int       `db:"reason_type"`
+	ReasonDescription       *string   `db:"reason_description"`
+	IsRestrictionChecked    bool      `db:"is_restriction_checked"`
+	IsViolationDetected     bool      `db:"is_violation_detected"`
+	IsExpenseAvailable      bool      `db:"is_expense_available"`
+	ViolationDescription    *string   `db:"violation_description"`
+	IsUnauthorizedConsumers bool      `db:"is_unauthorized_consumers"`
+	UnauthorizedDescription *string   `db:"unauthorized_description"`
+	UnauthorizedExplanation *string   `db:"unauthorized_explanation"`
+	EnergyActionAt          time.Time `db:"energy_action_at"`
+}
+
 type InspectedDevice struct {
 	ID           int             `db:"id"`
 	DeviceID     int             `db:"device_id"`

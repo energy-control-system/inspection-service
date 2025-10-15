@@ -93,6 +93,15 @@ type Attachment struct {
 	CreatedAt    time.Time      `json:"CreatedAt"`
 }
 
+type InspectedDevice struct {
+	ID           int             `json:"id"`
+	DeviceID     int             `json:"device_id"`
+	InspectionID int             `json:"inspection_id"`
+	Value        decimal.Decimal `json:"value"`
+	Consumption  decimal.Decimal `json:"consumption"`
+	CreatedAt    time.Time       `json:"created_at"`
+}
+
 type AttachPhotoRequest struct {
 	InspectionID int
 	Type         AttachmentType
@@ -102,33 +111,33 @@ type AttachPhotoRequest struct {
 }
 
 type FinishInspectionRequest struct {
-	ID                      int                             `json:"ID"`
-	Type                    Type                            `json:"Type"`
-	Resolution              Resolution                      `json:"Resolution"`
-	LimitReason             *string                         `json:"LimitReason"`
-	Method                  string                          `json:"Method"`
-	MethodBy                MethodBy                        `json:"MethodBy"`
-	ReasonType              ReasonType                      `json:"ReasonType"`
-	ReasonDescription       *string                         `json:"ReasonDescription"`
-	IsRestrictionChecked    bool                            `json:"IsRestrictionChecked"`
-	IsViolationDetected     bool                            `json:"IsViolationDetected"`
-	IsExpenseAvailable      bool                            `json:"IsExpenseAvailable"`
-	ViolationDescription    *string                         `json:"ViolationDescription"`
-	IsUnauthorizedConsumers bool                            `json:"IsUnauthorizedConsumers"`
-	UnauthorizedDescription *string                         `json:"UnauthorizedDescription"`
-	UnauthorizedExplanation *string                         `json:"UnauthorizedExplanation"`
-	EnergyActionAt          time.Time                       `json:"EnergyActionAt"`
-	InspectedDevices        []FinishInspectionDeviceRequest `json:"InspectedDevices"`
+	ID                      int                      `json:"ID"`
+	Type                    Type                     `json:"Type"`
+	Resolution              Resolution               `json:"Resolution"`
+	LimitReason             *string                  `json:"LimitReason"`
+	Method                  string                   `json:"Method"`
+	MethodBy                MethodBy                 `json:"MethodBy"`
+	ReasonType              ReasonType               `json:"ReasonType"`
+	ReasonDescription       *string                  `json:"ReasonDescription"`
+	IsRestrictionChecked    bool                     `json:"IsRestrictionChecked"`
+	IsViolationDetected     bool                     `json:"IsViolationDetected"`
+	IsExpenseAvailable      bool                     `json:"IsExpenseAvailable"`
+	ViolationDescription    *string                  `json:"ViolationDescription"`
+	IsUnauthorizedConsumers bool                     `json:"IsUnauthorizedConsumers"`
+	UnauthorizedDescription *string                  `json:"UnauthorizedDescription"`
+	UnauthorizedExplanation *string                  `json:"UnauthorizedExplanation"`
+	EnergyActionAt          time.Time                `json:"EnergyActionAt"`
+	InspectedDevices        []InspectedDeviceRequest `json:"InspectedDevices"`
 }
 
-type FinishInspectionDeviceRequest struct {
-	DeviceID       int                           `json:"DeviceID"`
-	Value          decimal.Decimal               `json:"Value"`
-	Consumption    decimal.Decimal               `json:"Consumption"`
-	InspectedSeals []FinishInspectionSealRequest `json:"InspectedSeals"`
+type InspectedDeviceRequest struct {
+	DeviceID       int                    `json:"DeviceID"`
+	Value          decimal.Decimal        `json:"Value"`
+	Consumption    decimal.Decimal        `json:"Consumption"`
+	InspectedSeals []InspectedSealRequest `json:"InspectedSeals"`
 }
 
-type FinishInspectionSealRequest struct {
+type InspectedSealRequest struct {
 	SealID   int  `json:"SealID"`
 	IsBroken bool `json:"IsBroken"`
 }

@@ -84,7 +84,7 @@ func (a *App) InitDatabases(fs fs.FS, path string) (err error) {
 }
 
 func (a *App) InitServices() error {
-	inspectionRepository := dbinspection.NewPostgres(a.postgres)
+	inspectionRepository := dbinspection.NewRepository(a.postgres)
 
 	inspectionPublisher := inspection.NewPublisher(a.mainCtx, a.inspectionProducer)
 
