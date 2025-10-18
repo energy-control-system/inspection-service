@@ -227,7 +227,7 @@ func (s *Service) FinishInspection(ctx goctx.Context, log golog.Logger, request 
 		"Акт %s №%d от %s (%s).docx",
 		actType,
 		request.ID,
-		gotime.MoscowNow().Format("02.01.2006"),
+		gotime.MoscowNow().Format(gotime.DateOnlyNet),
 		object.Address,
 	)
 
