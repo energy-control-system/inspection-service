@@ -38,7 +38,7 @@ var addAttachmentSQL string
 
 func (r *Repository) AddAttachment(ctx context.Context, inspectionID, fileID int, attachmentType inspection.AttachmentType) (inspection.Attachment, error) {
 	var a Attachment
-	err := r.db.GetContext(ctx, &a, addAttachmentSQL, inspectionID, fileID, attachmentType)
+	err := r.db.GetContext(ctx, &a, addAttachmentSQL, inspectionID, attachmentType, fileID)
 	if err != nil {
 		return inspection.Attachment{}, fmt.Errorf("r.db.GetContext: %w", err)
 	}
