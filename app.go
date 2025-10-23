@@ -64,7 +64,7 @@ func (a *App) InitDatabases(fs fs.FS, path string) (err error) {
 		return fmt.Errorf("init postgres: %w", err)
 	}
 
-	err = db.Migrate(fs, a.log, a.postgres, path)
+	err = db.Migrate(fs, a.log, a.postgres, path, "postgres")
 	if err != nil {
 		return fmt.Errorf("migrate postgres: %w", err)
 	}

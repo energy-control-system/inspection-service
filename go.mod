@@ -6,12 +6,12 @@ require (
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/lukasjarosch/go-docx v0.5.0
 	github.com/shopspring/decimal v1.4.0
-	github.com/sunshineOfficial/golib v0.0.12
+	github.com/sunshineOfficial/golib v0.0.17
 )
 
 require (
 	github.com/ClickHouse/ch-go v0.68.0 // indirect
-	github.com/ClickHouse/clickhouse-go/v2 v2.40.1 // indirect
+	github.com/ClickHouse/clickhouse-go/v2 v2.40.3 // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/andybalholm/brotli v1.2.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
@@ -62,14 +62,14 @@ require (
 	github.com/paulmach/orb v0.11.1 // indirect
 	github.com/philhofer/fwd v1.2.0 // indirect
 	github.com/pierrec/lz4/v4 v4.1.22 // indirect
-	github.com/pressly/goose/v3 v3.25.0 // indirect
+	github.com/pressly/goose/v3 v3.26.0 // indirect
 	github.com/prometheus/client_golang v1.23.2 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.66.1 // indirect
 	github.com/prometheus/procfs v0.16.1 // indirect
-	github.com/redis/go-redis/extra/rediscmd/v9 v9.14.0 // indirect
-	github.com/redis/go-redis/extra/redisotel/v9 v9.14.0 // indirect
-	github.com/redis/go-redis/v9 v9.14.0 // indirect
+	github.com/redis/go-redis/extra/rediscmd/v9 v9.14.1 // indirect
+	github.com/redis/go-redis/extra/redisotel/v9 v9.14.1 // indirect
+	github.com/redis/go-redis/v9 v9.14.1 // indirect
 	github.com/rs/xid v1.6.0 // indirect
 	github.com/segmentio/asm v1.2.0 // indirect
 	github.com/segmentio/kafka-go v0.4.49 // indirect
@@ -95,6 +95,7 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.2 // indirect
+	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/crypto v0.42.0 // indirect
 	golang.org/x/mod v0.28.0 // indirect
 	golang.org/x/net v0.44.0 // indirect
