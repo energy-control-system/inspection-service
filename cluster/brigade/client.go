@@ -1,7 +1,8 @@
 package brigade
 
 import (
-	"time"
+	"fmt"
+	"net/http"
 
 	"github.com/sunshineOfficial/golib/goctx"
 	"github.com/sunshineOfficial/golib/gohttp"
@@ -20,35 +21,15 @@ func NewClient(client gohttp.Client, baseURL string) *Client {
 }
 
 func (c *Client) GetBrigadeByID(ctx goctx.Context, id int) (Brigade, error) {
-	// TODO: убрать мок
-	return Brigade{
-		ID:     id,
-		Status: StatusOnTask,
-		Inspectors: []Inspector{
-			{
-				ID:          1,
-				Surname:     "Хрунин",
-				Name:        "Дмитрий",
-				Patronymic:  "Алексеевич",
-				PhoneNumber: "+791234567352",
-				Email:       "asdfsd@gmail.com",
-				AssignedAt:  time.Now(),
-				CreatedAt:   time.Now(),
-				UpdatedAt:   time.Now(),
-			},
-			{
-				ID:          2,
-				Surname:     "Пресняков",
-				Name:        "Артем",
-				Patronymic:  "Дмитриевич",
-				PhoneNumber: "+791234567353",
-				Email:       "asdfыsd2@gmail.com",
-				AssignedAt:  time.Now(),
-				CreatedAt:   time.Now(),
-				UpdatedAt:   time.Now(),
-			},
-		},
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-	}, nil
+	var response Brigade
+	status, err := c.client.DoJson(ctx, http.MethodGet, fmt.Sprintf("%s/brigades/%d", c.baseURL, id), nil, &response)
+	if err != nil {
+		return Brigade{}, fmt.Errorf("c.client.DoJson: %w", err)
+	}
+
+	if status != http.StatusOK {
+		return Brigade{}, fmt.Errorf("unexpected status code: %d", status)
+	}
+
+	return response, nil
 }
