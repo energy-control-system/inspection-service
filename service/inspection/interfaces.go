@@ -27,9 +27,9 @@ type AnalyzerService interface {
 }
 
 type SubscriberService interface {
-	GetObjectExtendedByID(ctx goctx.Context, id int) (subscriber.ObjectExtended, error)
-	GetObjectExtendedByDevice(ctx goctx.Context, deviceID int) (subscriber.ObjectExtended, error)
-	GetObjectExtendedBySeal(ctx goctx.Context, sealID int) (subscriber.ObjectExtended, error)
+	GetLastContractByObjectID(ctx goctx.Context, objectID int) (subscriber.Contract, error)
+	GetObjectByDeviceID(ctx goctx.Context, deviceID int) (subscriber.Object, error)
+	GetObjectBySealID(ctx goctx.Context, sealID int) (subscriber.Object, error)
 }
 
 type FileService interface {

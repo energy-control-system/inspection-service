@@ -1,7 +1,8 @@
 package subscriber
 
 import (
-	"time"
+	"fmt"
+	"net/http"
 
 	"github.com/sunshineOfficial/golib/goctx"
 	"github.com/sunshineOfficial/golib/gohttp"
@@ -19,130 +20,44 @@ func NewClient(client gohttp.Client, baseURL string) *Client {
 	}
 }
 
-func (c *Client) GetObjectExtendedByID(ctx goctx.Context, id int) (ObjectExtended, error) {
-	// TODO: убрать мок
-	return ObjectExtended{
-		ID:            id,
-		Address:       "г. Пенза, ул. Ворошилова, д. 9",
-		HaveAutomaton: true,
-		CreatedAt:     time.Date(2025, 10, 10, 9, 13, 14, 0, time.UTC),
-		UpdatedAt:     time.Date(2025, 10, 10, 9, 16, 31, 0, time.UTC),
-		Subscriber: Subscriber{
-			ID:            1,
-			AccountNumber: "asf123",
-			Surname:       "Шаипов",
-			Name:          "Камиль",
-			Patronymic:    "Гяряевич",
-			PhoneNumber:   "89234567856",
-			Email:         "test@gmail.com",
-			INN:           "1234567890",
-			BirthDate:     "01.09.2004",
-			Status:        StatusActive,
-			CreatedAt:     time.Date(2025, 10, 10, 9, 13, 14, 0, time.UTC),
-			UpdatedAt:     time.Date(2025, 10, 10, 9, 16, 31, 0, time.UTC),
-		},
-		Devices: []DeviceExtended{{
-			ID:               43,
-			ObjectID:         123,
-			Type:             "Счетчик",
-			Number:           "34525",
-			PlaceType:        DevicePlaceFlat,
-			PlaceDescription: "",
-			CreatedAt:        time.Date(2025, 10, 10, 9, 13, 14, 0, time.UTC),
-			UpdatedAt:        time.Date(2025, 10, 10, 9, 16, 31, 0, time.UTC),
-			Seals: []Seal{{
-				ID:        69,
-				DeviceID:  43,
-				Number:    "39303",
-				Place:     "Кухня",
-				CreatedAt: time.Date(2025, 10, 10, 9, 13, 14, 0, time.UTC),
-				UpdatedAt: time.Date(2025, 10, 10, 9, 16, 31, 0, time.UTC),
-			}},
-		}},
-	}, nil
+func (c *Client) GetLastContractByObjectID(ctx goctx.Context, objectID int) (Contract, error) {
+	var response Contract
+	status, err := c.client.DoJson(ctx, http.MethodGet, fmt.Sprintf("%s/contracts/objects/%d/last", c.baseURL, objectID), nil, &response)
+	if err != nil {
+		return Contract{}, fmt.Errorf("c.client.DoJson: %w", err)
+	}
+
+	if status != http.StatusOK {
+		return Contract{}, fmt.Errorf("unexpected status code: %d", status)
+	}
+
+	return response, nil
 }
 
-func (c *Client) GetObjectExtendedByDevice(ctx goctx.Context, deviceID int) (ObjectExtended, error) {
-	// TODO: убрать мок
-	return ObjectExtended{
-		ID:            123,
-		Address:       "г. Пенза, ул. Ворошилова, д. 9",
-		HaveAutomaton: true,
-		CreatedAt:     time.Date(2025, 10, 10, 9, 13, 14, 0, time.UTC),
-		UpdatedAt:     time.Date(2025, 10, 10, 9, 16, 31, 0, time.UTC),
-		Subscriber: Subscriber{
-			ID:            1,
-			AccountNumber: "asf123",
-			Surname:       "Шаипов",
-			Name:          "Камиль",
-			Patronymic:    "Гяряевич",
-			PhoneNumber:   "89234567856",
-			Email:         "test@gmail.com",
-			INN:           "1234567890",
-			BirthDate:     "01.09.2004",
-			Status:        StatusActive,
-			CreatedAt:     time.Date(2025, 10, 10, 9, 13, 14, 0, time.UTC),
-			UpdatedAt:     time.Date(2025, 10, 10, 9, 16, 31, 0, time.UTC),
-		},
-		Devices: []DeviceExtended{{
-			ID:               deviceID,
-			ObjectID:         123,
-			Type:             "Счетчик",
-			Number:           "34525",
-			PlaceType:        DevicePlaceFlat,
-			PlaceDescription: "",
-			CreatedAt:        time.Date(2025, 10, 10, 9, 13, 14, 0, time.UTC),
-			UpdatedAt:        time.Date(2025, 10, 10, 9, 16, 31, 0, time.UTC),
-			Seals: []Seal{{
-				ID:        69,
-				DeviceID:  43,
-				Number:    "39303",
-				Place:     "Кухня",
-				CreatedAt: time.Date(2025, 10, 10, 9, 13, 14, 0, time.UTC),
-				UpdatedAt: time.Date(2025, 10, 10, 9, 16, 31, 0, time.UTC),
-			}},
-		}},
-	}, nil
+func (c *Client) GetObjectByDeviceID(ctx goctx.Context, deviceID int) (Object, error) {
+	var response Object
+	status, err := c.client.DoJson(ctx, http.MethodGet, fmt.Sprintf("%s/objects/devices/%d", c.baseURL, deviceID), nil, &response)
+	if err != nil {
+		return Object{}, fmt.Errorf("c.client.DoJson: %w", err)
+	}
+
+	if status != http.StatusOK {
+		return Object{}, fmt.Errorf("unexpected status code: %d", status)
+	}
+
+	return response, nil
 }
 
-func (c *Client) GetObjectExtendedBySeal(ctx goctx.Context, sealID int) (ObjectExtended, error) {
-	return ObjectExtended{
-		ID:            123,
-		Address:       "г. Пенза, ул. Ворошилова, д. 9",
-		HaveAutomaton: true,
-		CreatedAt:     time.Date(2025, 10, 10, 9, 13, 14, 0, time.UTC),
-		UpdatedAt:     time.Date(2025, 10, 10, 9, 16, 31, 0, time.UTC),
-		Subscriber: Subscriber{
-			ID:            1,
-			AccountNumber: "asf123",
-			Surname:       "Шаипов",
-			Name:          "Камиль",
-			Patronymic:    "Гяряевич",
-			PhoneNumber:   "89234567856",
-			Email:         "test@gmail.com",
-			INN:           "1234567890",
-			BirthDate:     "01.09.2004",
-			Status:        StatusActive,
-			CreatedAt:     time.Date(2025, 10, 10, 9, 13, 14, 0, time.UTC),
-			UpdatedAt:     time.Date(2025, 10, 10, 9, 16, 31, 0, time.UTC),
-		},
-		Devices: []DeviceExtended{{
-			ID:               43,
-			ObjectID:         123,
-			Type:             "Счетчик",
-			Number:           "34525",
-			PlaceType:        DevicePlaceFlat,
-			PlaceDescription: "",
-			CreatedAt:        time.Date(2025, 10, 10, 9, 13, 14, 0, time.UTC),
-			UpdatedAt:        time.Date(2025, 10, 10, 9, 16, 31, 0, time.UTC),
-			Seals: []Seal{{
-				ID:        sealID,
-				DeviceID:  43,
-				Number:    "39303",
-				Place:     "Кухня",
-				CreatedAt: time.Date(2025, 10, 10, 9, 13, 14, 0, time.UTC),
-				UpdatedAt: time.Date(2025, 10, 10, 9, 16, 31, 0, time.UTC),
-			}},
-		}},
-	}, nil
+func (c *Client) GetObjectBySealID(ctx goctx.Context, sealID int) (Object, error) {
+	var response Object
+	status, err := c.client.DoJson(ctx, http.MethodGet, fmt.Sprintf("%s/objects/seals/%d", c.baseURL, sealID), nil, &response)
+	if err != nil {
+		return Object{}, fmt.Errorf("c.client.DoJson: %w", err)
+	}
+
+	if status != http.StatusOK {
+		return Object{}, fmt.Errorf("unexpected status code: %d", status)
+	}
+
+	return response, nil
 }

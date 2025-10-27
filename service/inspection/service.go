@@ -91,18 +91,18 @@ func (s *Service) AttachPhoto(ctx goctx.Context, log golog.Logger, request Attac
 		return Attachment{}, ErrBlurredPhoto
 	}
 
-	var object subscriber.ObjectExtended
+	var object subscriber.Object
 	switch request.Type {
 	case AttachmentTypeDevicePhoto:
-		object, err = s.subscriberService.GetObjectExtendedByDevice(ctx, request.DeviceID)
+		object, err = s.subscriberService.GetObjectByDeviceID(ctx, request.DeviceID)
 	case AttachmentTypeSealPhoto:
-		object, err = s.subscriberService.GetObjectExtendedBySeal(ctx, request.SealID)
+		object, err = s.subscriberService.GetObjectBySealID(ctx, request.SealID)
 	default:
 		return Attachment{}, fmt.Errorf("invalid attachment type: %d", request.Type)
 	}
 
 	if err != nil {
-		return Attachment{}, fmt.Errorf("get object extended: %w", err)
+		return Attachment{}, fmt.Errorf("get object: %w", err)
 	}
 
 	number, err := attachmentNumber(request, object)
@@ -143,7 +143,7 @@ func attachmentName(t AttachmentType) string {
 	}
 }
 
-func attachmentNumber(request AttachPhotoRequest, object subscriber.ObjectExtended) (string, error) {
+func attachmentNumber(request AttachPhotoRequest, object subscriber.Object) (string, error) {
 	switch request.Type {
 	case AttachmentTypeDevicePhoto:
 		for _, device := range object.Devices {
@@ -190,26 +190,26 @@ func (s *Service) FinishInspection(ctx goctx.Context, log golog.Logger, request 
 		return file.File{}, fmt.Errorf("get brigade by id: %w", err)
 	}
 
-	object, err := s.subscriberService.GetObjectExtendedByID(ctx, tsk.ObjectID)
+	contract, err := s.subscriberService.GetLastContractByObjectID(ctx, tsk.ObjectID)
 	if err != nil {
-		return file.File{}, fmt.Errorf("get object extended: %w", err)
+		return file.File{}, fmt.Errorf("get contract by object id: %w", err)
 	}
 
-	if len(object.Devices) == 0 {
+	if len(contract.Object.Devices) == 0 {
 		return file.File{}, errors.New("no devices found")
 	}
 
 	var buf *bytes.Buffer
 	switch request.Type {
 	case TypeLimitation, TypeResumption:
-		buf, err = s.generateUniversalAct(request, brig, object)
+		buf, err = s.generateUniversalAct(request, brig, contract)
 	case TypeVerification, TypeUnauthorizedConnection:
-		devices, dErr := s.repository.GetPreviousDeviceInspections(ctx, object.Devices[0].ID, request.ID)
+		devices, dErr := s.repository.GetPreviousDeviceInspections(ctx, contract.Object.Devices[0].ID, request.ID)
 		if dErr != nil {
 			return file.File{}, fmt.Errorf("get device inspections: %w", dErr)
 		}
 
-		buf, err = s.generateControlAct(request, brig, object, devices)
+		buf, err = s.generateControlAct(request, brig, contract, devices)
 	default:
 		return file.File{}, fmt.Errorf("invalid inspection type: %d", request.Type)
 	}
@@ -228,7 +228,7 @@ func (s *Service) FinishInspection(ctx goctx.Context, log golog.Logger, request 
 		actType,
 		request.ID,
 		gotime.MoscowNow().Format(gotime.DateOnlyNet),
-		object.Address,
+		contract.Object.Address,
 	)
 
 	uploadedFile, err := s.fileService.Upload(ctx, actName, buf)
@@ -256,7 +256,7 @@ func (s *Service) FinishInspection(ctx goctx.Context, log golog.Logger, request 
 	return uploadedFile, nil
 }
 
-func (s *Service) generateUniversalAct(request FinishInspectionRequest, brig brigade.Brigade, object subscriber.ObjectExtended) (*bytes.Buffer, error) {
+func (s *Service) generateUniversalAct(request FinishInspectionRequest, brig brigade.Brigade, contract subscriber.Contract) (*bytes.Buffer, error) {
 	now := gotime.MoscowNow()
 
 	isLimitation := "☒"
@@ -268,7 +268,7 @@ func (s *Service) generateUniversalAct(request FinishInspectionRequest, brig bri
 
 	haveAutomaton := "☐"
 	noAutomaton := "☒"
-	if object.HaveAutomaton {
+	if contract.Object.HaveAutomaton {
 		haveAutomaton = "☒"
 		noAutomaton = "☐"
 	}
@@ -305,7 +305,7 @@ func (s *Service) generateUniversalAct(request FinishInspectionRequest, brig bri
 		isByInspector = "☐"
 	}
 
-	device := object.Devices[0]
+	device := contract.Object.Devices[0]
 	inspectedDevice := request.InspectedDevices[0]
 
 	isInside := "☐"
@@ -315,6 +315,7 @@ func (s *Service) generateUniversalAct(request FinishInspectionRequest, brig bri
 		isInside = "☒"
 	case subscriber.DevicePlaceStairLanding:
 		isOutside = "☒"
+	case subscriber.DevicePlaceOther:
 	default:
 		return nil, fmt.Errorf("invalid device place: %d", device.PlaceType)
 	}
@@ -364,12 +365,12 @@ func (s *Service) generateUniversalAct(request FinishInspectionRequest, brig bri
 		"act_year":                 now.Year(),
 		"act_hour":                 now.Format("15"),
 		"act_minute":               now.Format("04"),
-		"act_place":                object.Address,
-		"consumer_fio":             fullFIO(object.Subscriber.Surname, object.Subscriber.Name, object.Subscriber.Patronymic),
-		"address":                  object.Address,
+		"act_place":                contract.Object.Address,
+		"consumer_fio":             fullFIO(contract.Subscriber.Surname, contract.Subscriber.Name, contract.Subscriber.Patronymic),
+		"address":                  contract.Object.Address,
 		"have_automaton":           haveAutomaton,
 		"no_automaton":             noAutomaton,
-		"account_number":           object.Subscriber.AccountNumber,
+		"account_number":           contract.Subscriber.AccountNumber,
 		"is_incomplete_payment":    isIncomplete,
 		"is_other_reason":          isOtherReason,
 		"other_reason":             otherReason,
@@ -407,7 +408,7 @@ func (s *Service) generateUniversalAct(request FinishInspectionRequest, brig bri
 	return buf, nil
 }
 
-func (s *Service) generateControlAct(request FinishInspectionRequest, brig brigade.Brigade, object subscriber.ObjectExtended, devices []InspectedDevice) (*bytes.Buffer, error) {
+func (s *Service) generateControlAct(request FinishInspectionRequest, brig brigade.Brigade, contract subscriber.Contract, devices []InspectedDevice) (*bytes.Buffer, error) {
 	now := gotime.MoscowNow()
 
 	isVerification := "☒"
@@ -419,7 +420,7 @@ func (s *Service) generateControlAct(request FinishInspectionRequest, brig briga
 
 	haveAutomaton := "☐"
 	noAutomaton := "☒"
-	if object.HaveAutomaton {
+	if contract.Object.HaveAutomaton {
 		haveAutomaton = "☒"
 		noAutomaton = "☐"
 	}
@@ -489,7 +490,7 @@ func (s *Service) generateControlAct(request FinishInspectionRequest, brig briga
 		unauthorizedDescription = *request.UnauthorizedDescription
 	}
 
-	device := object.Devices[0]
+	device := contract.Object.Devices[0]
 	inspectedDevice := request.InspectedDevices[0]
 
 	isInside := "☐"
@@ -499,6 +500,7 @@ func (s *Service) generateControlAct(request FinishInspectionRequest, brig briga
 		isInside = "☒"
 	case subscriber.DevicePlaceStairLanding:
 		isOutside = "☒"
+	case subscriber.DevicePlaceOther:
 	default:
 		return nil, fmt.Errorf("invalid device place: %d", device.PlaceType)
 	}
@@ -543,13 +545,13 @@ func (s *Service) generateControlAct(request FinishInspectionRequest, brig briga
 		"act_year":                      now.Year(),
 		"act_hour":                      now.Format("15"),
 		"act_minute":                    now.Format("04"),
-		"act_place":                     object.Address,
-		"consumer_fio":                  fullFIO(object.Subscriber.Surname, object.Subscriber.Name, object.Subscriber.Patronymic),
-		"address":                       object.Address,
+		"act_place":                     contract.Object.Address,
+		"consumer_fio":                  fullFIO(contract.Subscriber.Surname, contract.Subscriber.Name, contract.Subscriber.Patronymic),
+		"address":                       contract.Object.Address,
 		"have_automaton":                haveAutomaton,
 		"no_automaton":                  noAutomaton,
-		"account_number":                object.Subscriber.AccountNumber,
-		"consumer_phone":                object.Subscriber.PhoneNumber,
+		"account_number":                contract.Subscriber.AccountNumber,
+		"consumer_phone":                contract.Subscriber.PhoneNumber,
 		"is_incomplete_payment":         isIncomplete,
 		"is_other_reason":               isOtherReason,
 		"other_reason":                  otherReason,

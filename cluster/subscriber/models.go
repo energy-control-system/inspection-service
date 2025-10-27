@@ -20,20 +20,28 @@ type Subscriber struct {
 	PhoneNumber   string    `json:"PhoneNumber"`
 	Email         string    `json:"Email"`
 	INN           string    `json:"INN"`
-	BirthDate     string    `json:"BirthDate"`
+	BirthDate     time.Time `json:"BirthDate"`
 	Status        Status    `json:"Status"`
+	Passport      Passport  `json:"Passport"`
 	CreatedAt     time.Time `json:"CreatedAt"`
 	UpdatedAt     time.Time `json:"UpdatedAt"`
 }
 
-type ObjectExtended struct {
-	ID            int              `json:"ID"`
-	Address       string           `json:"Address"`
-	HaveAutomaton bool             `json:"HaveAutomaton"`
-	CreatedAt     time.Time        `json:"CreatedAt"`
-	UpdatedAt     time.Time        `json:"UpdatedAt"`
-	Subscriber    Subscriber       `json:"Subscriber"`
-	Devices       []DeviceExtended `json:"Devices"`
+type Passport struct {
+	ID        int    `json:"ID"`
+	Series    string `json:"Series"`
+	Number    string `json:"Number"`
+	IssuedBy  string `json:"IssuedBy"`
+	IssueDate string `json:"IssueDate"`
+}
+
+type Object struct {
+	ID            int       `json:"ID"`
+	Address       string    `json:"Address"`
+	HaveAutomaton bool      `json:"HaveAutomaton"`
+	CreatedAt     time.Time `json:"CreatedAt"`
+	UpdatedAt     time.Time `json:"UpdatedAt"`
+	Devices       []Device  `json:"Devices"`
 }
 
 type DevicePlaceType int
@@ -45,7 +53,7 @@ const (
 	DevicePlaceStairLanding
 )
 
-type DeviceExtended struct {
+type Device struct {
 	ID               int             `json:"ID"`
 	ObjectID         int             `json:"ObjectID"`
 	Type             string          `json:"Type"`
@@ -64,4 +72,14 @@ type Seal struct {
 	Place     string    `json:"Place"`
 	CreatedAt time.Time `json:"CreatedAt"`
 	UpdatedAt time.Time `json:"UpdatedAt"`
+}
+
+type Contract struct {
+	ID         int        `json:"ID"`
+	Number     string     `json:"Number"`
+	Subscriber Subscriber `json:"Subscriber"`
+	Object     Object     `json:"Object"`
+	SignDate   string     `json:"SignDate"`
+	CreatedAt  time.Time  `json:"CreatedAt"`
+	UpdatedAt  time.Time  `json:"UpdatedAt"`
 }
