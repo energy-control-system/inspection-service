@@ -20,6 +20,19 @@ func NewRepository(db *sqlx.DB) *Repository {
 	}
 }
 
+//go:embed sql/get_all.sql
+var getAllSQL string
+
+func (r *Repository) GetAll(ctx context.Context) ([]inspection.Inspection, error) {
+	var inspections []Inspection
+	err := r.db.SelectContext(ctx, &inspections, getAllSQL)
+	if err != nil {
+		return nil, fmt.Errorf("r.db.SelectContext: %w", err)
+	}
+
+	return MapSliceFromDB(inspections), nil
+}
+
 //go:embed sql/get_by_task_id.sql
 var getByTaskIDSQL string
 

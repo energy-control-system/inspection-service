@@ -30,6 +30,15 @@ func MapFromDB(i Inspection) inspection.Inspection {
 	}
 }
 
+func MapSliceFromDB(inspections []Inspection) []inspection.Inspection {
+	result := make([]inspection.Inspection, 0, len(inspections))
+	for _, i := range inspections {
+		result = append(result, MapFromDB(i))
+	}
+
+	return result
+}
+
 func MapFinishInspectionRequestToDB(r inspection.FinishInspectionRequest) FinishInspectionRequest {
 	return FinishInspectionRequest{
 		ID:                      r.ID,

@@ -9,6 +9,17 @@ import (
 	"github.com/sunshineOfficial/golib/gohttp/gorouter"
 )
 
+func GetAllInspections(s *inspection.Service) gorouter.Handler {
+	return func(c gorouter.Context) error {
+		response, err := s.GetAll(c.Ctx())
+		if err != nil {
+			return fmt.Errorf("failed to get all inspections: %w", err)
+		}
+
+		return c.WriteJson(http.StatusOK, response)
+	}
+}
+
 type taskIDVars struct {
 	TaskID int `path:"taskID"`
 }
