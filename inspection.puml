@@ -1,0 +1,111 @@
+@startuml Inspection Service Component Diagram
+
+!theme plain
+skinparam componentStyle uml2
+
+title Inspection Service - Component Diagram
+
+package "Application Layer" {
+    component [Main] as main
+    component [App] as app
+}
+
+package "HTTP API Layer" {
+    component [HTTP Server] as httpServer
+    component [Router] as router
+    
+    package "Handlers" {
+        component [Inspection Handler] as inspectionHandler
+    }
+}
+
+package "Business Logic Layer" {
+    component [Inspection Service] as inspectionService
+    component [Inspection Publisher] as inspectionPublisher
+}
+
+package "Data Access Layer" {
+    component [Inspection Repository] as inspectionRepo
+}
+
+package "External Integrations" {
+    component [Analyzer Service Client] as analyzerClient
+    component [Subscriber Service Client] as subscriberClient
+    component [File Service Client] as fileClient
+    component [Task Service Client] as taskClient
+    component [Brigade Service Client] as brigadeClient
+    component [Kafka Consumer] as kafkaConsumer
+    component [Kafka Producer] as kafkaProducer
+}
+
+package "Infrastructure" {
+    database "PostgreSQL" as postgres
+    queue "Kafka" as kafka
+    node "Analyzer Service\n(External)" as analyzerService
+    node "Subscriber Service\n(External)" as subscriberService
+    node "File Service\n(External)" as fileService
+    node "Task Service\n(External)" as taskService
+    node "Brigade Service\n(External)" as brigadeService
+}
+
+package "Configuration" {
+    component [Config] as config
+}
+
+' Application flow
+main --> app
+app --> config
+app --> httpServer
+app --> kafkaConsumer
+
+' HTTP Server flow
+httpServer --> router
+router --> inspectionHandler
+
+' Handler to Service flow
+inspectionHandler --> inspectionService
+
+' Service to Repository flow
+inspectionService --> inspectionRepo
+inspectionService --> inspectionPublisher
+
+' Service to External Clients flow
+inspectionService --> analyzerClient
+inspectionService --> subscriberClient
+inspectionService --> fileClient
+inspectionService --> taskClient
+inspectionService --> brigadeClient
+
+' Repository to Database
+inspectionRepo --> postgres
+
+' External clients to services
+analyzerClient --> analyzerService
+subscriberClient --> subscriberService
+fileClient --> fileService
+taskClient --> taskService
+brigadeClient --> brigadeService
+
+' Kafka event handling
+kafkaConsumer --> kafka
+kafka --> kafkaConsumer : task events
+kafkaConsumer ..> inspectionService : SubscriberOnTaskEvent()
+
+' Kafka producer
+inspectionPublisher --> kafkaProducer
+kafkaProducer --> kafka : inspection events
+
+note right of inspectionService
+  Обрабатывает события задач
+  из Kafka и создает/завершает
+  инспекции. Генерирует акты
+  и публикует события инспекций
+end note
+
+note right of inspectionPublisher
+  Публикует события инспекций
+  (Start, Finish) в Kafka
+end note
+
+@enduml
+
