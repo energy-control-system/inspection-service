@@ -9,6 +9,14 @@ import (
 	"github.com/sunshineOfficial/golib/gohttp/gorouter"
 )
 
+// GetAllInspections godoc
+// @Summary List inspections
+// @Description Returns all inspections.
+// @Tags inspections
+// @Produce json
+// @Success 200 {array} inspection.Inspection
+// @Failure 500 {object} gorouter.ErrorResponse
+// @Router /inspections [get]
 func GetAllInspections(s *inspection.Service) gorouter.Handler {
 	return func(c gorouter.Context) error {
 		response, err := s.GetAll(c.Ctx())
@@ -24,6 +32,17 @@ type taskIDVars struct {
 	TaskID int `path:"taskID"`
 }
 
+// GetInspectionByTaskID godoc
+// @Summary Get inspection by task ID
+// @Description Returns an inspection linked to a task.
+// @Tags inspections
+// @Produce json
+// @Param taskID path int true "Task ID"
+// @Success 200 {object} inspection.Inspection
+// @Failure 400 {object} gorouter.ErrorResponse
+// @Failure 404 {object} gorouter.ErrorResponse
+// @Failure 500 {object} gorouter.ErrorResponse
+// @Router /inspections/task/{taskID} [get]
 func GetInspectionByTaskID(s *inspection.Service) gorouter.Handler {
 	return func(c gorouter.Context) error {
 		var vars taskIDVars
@@ -44,6 +63,22 @@ type inspectionIDVars struct {
 	ID int `path:"id"`
 }
 
+// AttachPhotoToInspection godoc
+// @Summary Attach inspection photo
+// @Description Uploads one device or seal photo and attaches it to an inspection.
+// @Tags inspections
+// @Accept multipart/form-data
+// @Produce json
+// @Param id path int true "Inspection ID"
+// @Param Photo formData file true "Inspection photo"
+// @Param AttachmentType formData int true "Attachment type: 1=device photo, 2=seal photo"
+// @Param DeviceID formData int false "Device ID, required when AttachmentType is 1"
+// @Param SealID formData int false "Seal ID, required when AttachmentType is 2"
+// @Success 200 {object} inspection.Attachment
+// @Failure 400 {object} gorouter.ErrorResponse
+// @Failure 404 {object} gorouter.ErrorResponse
+// @Failure 500 {object} gorouter.ErrorResponse
+// @Router /inspections/{id}/photo [post]
 func AttachPhotoToInspection(s *inspection.Service) gorouter.Handler {
 	return func(c gorouter.Context) error {
 		var vars inspectionIDVars
@@ -123,6 +158,19 @@ func AttachPhotoToInspection(s *inspection.Service) gorouter.Handler {
 	}
 }
 
+// FinishInspection godoc
+// @Summary Finish inspection
+// @Description Saves inspection results, generated data, and completion state.
+// @Tags inspections
+// @Accept json
+// @Produce json
+// @Param id path int true "Inspection ID"
+// @Param request body inspection.FinishInspectionRequest true "Inspection completion payload"
+// @Success 200 {object} inspection.Inspection
+// @Failure 400 {object} gorouter.ErrorResponse
+// @Failure 404 {object} gorouter.ErrorResponse
+// @Failure 500 {object} gorouter.ErrorResponse
+// @Router /inspections/{id}/finish [patch]
 func FinishInspection(s *inspection.Service) gorouter.Handler {
 	return func(c gorouter.Context) error {
 		var vars inspectionIDVars

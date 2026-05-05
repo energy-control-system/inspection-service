@@ -8,8 +8,14 @@ import (
 	"github.com/shopspring/decimal"
 	"github.com/sunshineOfficial/golib/golog"
 	"github.com/sunshineOfficial/golib/goos"
+
+	_ "inspection-service/docs"
 )
 
+// @title Inspection Service API
+// @version 1.0
+// @description API for managing inspections, photos, and inspection completion.
+// @BasePath /api/inspection-service
 func main() {
 	configureDecimal()
 

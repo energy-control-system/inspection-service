@@ -1,0 +1,350 @@
+basePath: /api/inspection-service
+definitions:
+  gorouter.ErrorInfo:
+    properties:
+      code:
+        type: string
+      message:
+        type: string
+    type: object
+  gorouter.ErrorResponse:
+    properties:
+      error:
+        $ref: '#/definitions/gorouter.ErrorInfo'
+    type: object
+  inspection-service_service_inspection.Attachment:
+    properties:
+      CreatedAt:
+        type: string
+      FileID:
+        type: integer
+      ID:
+        type: integer
+      InspectionID:
+        type: integer
+      Type:
+        $ref: '#/definitions/inspection-service_service_inspection.AttachmentType'
+    type: object
+  inspection-service_service_inspection.AttachmentType:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    type: integer
+    x-enum-varnames:
+    - AttachmentTypeUnknown
+    - AttachmentTypeDevicePhoto
+    - AttachmentTypeSealPhoto
+    - AttachmentTypeAct
+  inspection-service_service_inspection.FinishInspectionRequest:
+    properties:
+      EnergyActionAt:
+        type: string
+      ID:
+        type: integer
+      InspectedDevices:
+        items:
+          $ref: '#/definitions/inspection.InspectedDeviceRequest'
+        type: array
+      IsExpenseAvailable:
+        type: boolean
+      IsRestrictionChecked:
+        type: boolean
+      IsUnauthorizedConsumers:
+        type: boolean
+      IsViolationDetected:
+        type: boolean
+      LimitReason:
+        type: string
+      Method:
+        type: string
+      MethodBy:
+        $ref: '#/definitions/inspection-service_service_inspection.MethodBy'
+      ReasonDescription:
+        type: string
+      ReasonType:
+        $ref: '#/definitions/inspection-service_service_inspection.ReasonType'
+      Resolution:
+        $ref: '#/definitions/inspection-service_service_inspection.Resolution'
+      Type:
+        $ref: '#/definitions/inspection-service_service_inspection.Type'
+      UnauthorizedDescription:
+        type: string
+      UnauthorizedExplanation:
+        type: string
+      ViolationDescription:
+        type: string
+    type: object
+  inspection-service_service_inspection.Inspection:
+    properties:
+      CreatedAt:
+        type: string
+      EnergyActionAt:
+        type: string
+      ID:
+        type: integer
+      InspectAt:
+        type: string
+      IsExpenseAvailable:
+        type: boolean
+      IsRestrictionChecked:
+        type: boolean
+      IsUnauthorizedConsumers:
+        type: boolean
+      IsViolationDetected:
+        type: boolean
+      LimitReason:
+        type: string
+      Method:
+        type: string
+      MethodBy:
+        $ref: '#/definitions/inspection-service_service_inspection.MethodBy'
+      ReasonDescription:
+        type: string
+      ReasonType:
+        $ref: '#/definitions/inspection-service_service_inspection.ReasonType'
+      Resolution:
+        $ref: '#/definitions/inspection-service_service_inspection.Resolution'
+      Status:
+        $ref: '#/definitions/inspection-service_service_inspection.Status'
+      TaskID:
+        type: integer
+      Type:
+        $ref: '#/definitions/inspection-service_service_inspection.Type'
+      UnauthorizedDescription:
+        type: string
+      UnauthorizedExplanation:
+        type: string
+      UpdatedAt:
+        type: string
+      ViolationDescription:
+        type: string
+    type: object
+  inspection-service_service_inspection.MethodBy:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - MethodByUnknown
+    - MethodByConsumer
+    - MethodByInspector
+  inspection-service_service_inspection.ReasonType:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    type: integer
+    x-enum-varnames:
+    - ReasonTypeUnknown
+    - ReasonTypeNotIntroduced
+    - ReasonTypeConsumerLimited
+    - ReasonTypeInspectorLimited
+    - ReasonTypeResumed
+  inspection-service_service_inspection.Resolution:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    type: integer
+    x-enum-varnames:
+    - ResolutionUnknown
+    - ResolutionLimited
+    - ResolutionStopped
+    - ResolutionResumed
+  inspection-service_service_inspection.Status:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - StatusUnknown
+    - StatusInWork
+    - StatusDone
+  inspection-service_service_inspection.Type:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    type: integer
+    x-enum-varnames:
+    - TypeUnknown
+    - TypeLimitation
+    - TypeResumption
+    - TypeVerification
+    - TypeUnauthorizedConnection
+  inspection.InspectedDeviceRequest:
+    properties:
+      Consumption:
+        type: number
+      DeviceID:
+        type: integer
+      InspectedSeals:
+        items:
+          $ref: '#/definitions/inspection.InspectedSealRequest'
+        type: array
+      Value:
+        type: number
+    type: object
+  inspection.InspectedSealRequest:
+    properties:
+      IsBroken:
+        type: boolean
+      SealID:
+        type: integer
+    type: object
+info:
+  contact: {}
+  description: API for managing inspections, photos, and inspection completion.
+  title: Inspection Service API
+  version: "1.0"
+paths:
+  /inspections:
+    get:
+      description: Returns all inspections.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/inspection-service_service_inspection.Inspection'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gorouter.ErrorResponse'
+      summary: List inspections
+      tags:
+      - inspections
+  /inspections/{id}/finish:
+    patch:
+      consumes:
+      - application/json
+      description: Saves inspection results, generated data, and completion state.
+      parameters:
+      - description: Inspection ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Inspection completion payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/inspection-service_service_inspection.FinishInspectionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/inspection-service_service_inspection.Inspection'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gorouter.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/gorouter.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gorouter.ErrorResponse'
+      summary: Finish inspection
+      tags:
+      - inspections
+  /inspections/{id}/photo:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Uploads one device or seal photo and attaches it to an inspection.
+      parameters:
+      - description: Inspection ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Inspection photo
+        in: formData
+        name: Photo
+        required: true
+        type: file
+      - description: 'Attachment type: 1=device photo, 2=seal photo'
+        in: formData
+        name: AttachmentType
+        required: true
+        type: integer
+      - description: Device ID, required when AttachmentType is 1
+        in: formData
+        name: DeviceID
+        type: integer
+      - description: Seal ID, required when AttachmentType is 2
+        in: formData
+        name: SealID
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/inspection-service_service_inspection.Attachment'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gorouter.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/gorouter.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gorouter.ErrorResponse'
+      summary: Attach inspection photo
+      tags:
+      - inspections
+  /inspections/task/{taskID}:
+    get:
+      description: Returns an inspection linked to a task.
+      parameters:
+      - description: Task ID
+        in: path
+        name: taskID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/inspection-service_service_inspection.Inspection'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gorouter.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/gorouter.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gorouter.ErrorResponse'
+      summary: Get inspection by task ID
+      tags:
+      - inspections
+swagger: "2.0"

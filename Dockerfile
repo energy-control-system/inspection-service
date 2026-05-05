@@ -1,10 +1,15 @@
+# syntax=docker/dockerfile:1
+
 FROM golang:1.25 AS build
 
 WORKDIR /build
-COPY . .
+COPY go.mod go.sum ./
 
-# Скачиваем зависимости (кешируется в слое Docker)
-RUN go mod download
+# Скачиваем зависимости (кешируется между BuildKit-сборками)
+RUN --mount=type=cache,id=go-mod-cache,target=/go/pkg/mod \
+    go mod download
+
+COPY . .
 
 # Копируем файлы, которые нужны в рантайме
 RUN mkdir out && \
@@ -15,7 +20,9 @@ RUN mkdir out && \
     mv .config/ out/
 
 # Билдим гошечку в бинарник out/app
-RUN go build -o out/app
+RUN --mount=type=cache,id=go-mod-cache,target=/go/pkg/mod \
+    --mount=type=cache,id=go-build-cache,target=/root/.cache/go-build \
+    go build -o out/app
 
 FROM ubuntu:24.04
 
