@@ -43,7 +43,26 @@ func (r *Repository) GetByTaskID(ctx context.Context, taskID int) (inspection.In
 		return inspection.Inspection{}, fmt.Errorf("r.db.GetContext: %w", err)
 	}
 
-	return MapFromDB(ins), nil
+	result := MapFromDB(ins)
+	result.InspectedDevices, err = r.getDevicesByInspectionID(ctx, ins.ID)
+	if err != nil {
+		return inspection.Inspection{}, fmt.Errorf("get devices by inspection id: %w", err)
+	}
+
+	return result, nil
+}
+
+//go:embed sql/get_devices_by_inspection_id.sql
+var getDevicesByInspectionIDSQL string
+
+func (r *Repository) getDevicesByInspectionID(ctx context.Context, inspectionID int) ([]inspection.InspectedDevice, error) {
+	var devices []InspectedDevice
+	err := r.db.SelectContext(ctx, &devices, getDevicesByInspectionIDSQL, inspectionID)
+	if err != nil {
+		return nil, fmt.Errorf("r.db.SelectContext: %w", err)
+	}
+
+	return MapInspectedDevicesSliceFromDB(devices), nil
 }
 
 //go:embed sql/add_attachment.sql
