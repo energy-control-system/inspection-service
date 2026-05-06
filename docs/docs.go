@@ -25,6 +25,20 @@ const docTemplate = `{
                     "inspections"
                 ],
                 "summary": "List inspections",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Maximum number of items to return; 0 means no limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of items to skip",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -33,6 +47,12 @@ const docTemplate = `{
                             "items": {
                                 "$ref": "#/definitions/inspection-service_service_inspection.Inspection"
                             }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/gorouter.ErrorResponse"
                         }
                     },
                     "500": {
@@ -341,6 +361,29 @@ const docTemplate = `{
                 }
             }
         },
+        "inspection-service_service_inspection.InspectedDevice": {
+            "type": "object",
+            "properties": {
+                "consumption": {
+                    "type": "number"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "device_id": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "inspection_id": {
+                    "type": "integer"
+                },
+                "value": {
+                    "type": "number"
+                }
+            }
+        },
         "inspection-service_service_inspection.Inspection": {
             "type": "object",
             "properties": {
@@ -355,6 +398,12 @@ const docTemplate = `{
                 },
                 "InspectAt": {
                     "type": "string"
+                },
+                "InspectedDevices": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/inspection-service_service_inspection.InspectedDevice"
+                    }
                 },
                 "IsExpenseAvailable": {
                     "type": "boolean"

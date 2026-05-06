@@ -10,10 +10,11 @@ import (
 	"io"
 
 	"github.com/sunshineOfficial/golib/goctx"
+	"github.com/sunshineOfficial/golib/pagination"
 )
 
 type Repository interface {
-	GetAll(ctx context.Context) ([]Inspection, error)
+	GetAll(ctx context.Context, page pagination.Pagination) ([]Inspection, error)
 	GetByTaskID(ctx context.Context, taskID int) (Inspection, error)
 	AddAttachment(ctx context.Context, inspectionID, fileID int, attachmentType AttachmentType) (Attachment, error)
 	GetByID(ctx context.Context, id int) (Inspection, error)

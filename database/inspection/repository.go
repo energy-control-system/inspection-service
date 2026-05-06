@@ -8,6 +8,7 @@ import (
 	"inspection-service/service/inspection"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/sunshineOfficial/golib/pagination"
 )
 
 type Repository struct {
@@ -23,9 +24,9 @@ func NewRepository(db *sqlx.DB) *Repository {
 //go:embed sql/get_all.sql
 var getAllSQL string
 
-func (r *Repository) GetAll(ctx context.Context) ([]inspection.Inspection, error) {
+func (r *Repository) GetAll(ctx context.Context, page pagination.Pagination) ([]inspection.Inspection, error) {
 	var inspections []Inspection
-	err := r.db.SelectContext(ctx, &inspections, getAllSQL)
+	err := r.db.SelectContext(ctx, &inspections, getAllSQL, page.LimitArg(), page.Offset)
 	if err != nil {
 		return nil, fmt.Errorf("r.db.SelectContext: %w", err)
 	}

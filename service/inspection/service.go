@@ -14,6 +14,7 @@ import (
 	"github.com/sunshineOfficial/golib/goctx"
 	"github.com/sunshineOfficial/golib/golog"
 	"github.com/sunshineOfficial/golib/gotime"
+	"github.com/sunshineOfficial/golib/pagination"
 )
 
 const kafkaSubscribeTimeout = 2 * time.Minute
@@ -43,8 +44,12 @@ func NewService(repository Repository, publisher *Publisher, analyzerService Ana
 	}
 }
 
-func (s *Service) GetAll(ctx goctx.Context) ([]Inspection, error) {
-	inspections, err := s.repository.GetAll(ctx)
+func (s *Service) GetAll(ctx goctx.Context, page pagination.Pagination) ([]Inspection, error) {
+	if err := page.Validate(); err != nil {
+		return nil, fmt.Errorf("validate pagination: %w", err)
+	}
+
+	inspections, err := s.repository.GetAll(ctx, page)
 	if err != nil {
 		return nil, fmt.Errorf("get all inspections: %w", err)
 	}

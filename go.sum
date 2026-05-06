@@ -188,8 +188,8 @@ github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu7U=
 github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
-github.com/sunshineOfficial/golib v0.0.17 h1:7B1UiQFBcVCn6Db/alMkv1ntgtP8Ai6AQfhJ3UQbTvI=
-github.com/sunshineOfficial/golib v0.0.17/go.mod h1:UQ6FcffkjdWcMHK/yG7pRueVifdC7EjQ/RtoaDEBsh8=
+github.com/sunshineOfficial/golib v0.0.20 h1:9d173pwd/+yD/okQQDqlOMIoLPg8QB0Huo2DQqMLA6A=
+github.com/sunshineOfficial/golib v0.0.20/go.mod h1:UQ6FcffkjdWcMHK/yG7pRueVifdC7EjQ/RtoaDEBsh8=
 github.com/swaggo/files/v2 v2.0.2 h1:Bq4tgS/yxLB/3nwOMcul5oLEUKa877Ykgz3CJMVbQKU=
 github.com/swaggo/files/v2 v2.0.2/go.mod h1:TVqetIzZsO9OhHX1Am9sRf9LdrFZqoK49N37KON/jr0=
 github.com/swaggo/http-swagger/v2 v2.0.2 h1:FKCdLsl+sFCx60KFsyM0rDarwiUSZ8DqbfSyIKC9OBg=

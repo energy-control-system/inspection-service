@@ -19,4 +19,6 @@ select id,
        energy_action_at,
        created_at,
        updated_at
-from inspections;
+from inspections
+order by id
+limit $1 offset $2;

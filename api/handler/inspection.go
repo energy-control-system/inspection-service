@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/sunshineOfficial/golib/gohttp/gorouter"
+	"github.com/sunshineOfficial/golib/pagination"
 )
 
 // GetAllInspections godoc
@@ -14,12 +15,20 @@ import (
 // @Description Returns all inspections.
 // @Tags inspections
 // @Produce json
+// @Param limit query int false "Maximum number of items to return; 0 means no limit"
+// @Param offset query int false "Number of items to skip"
 // @Success 200 {array} inspection.Inspection
+// @Failure 400 {object} gorouter.ErrorResponse
 // @Failure 500 {object} gorouter.ErrorResponse
 // @Router /inspections [get]
 func GetAllInspections(s *inspection.Service) gorouter.Handler {
 	return func(c gorouter.Context) error {
-		response, err := s.GetAll(c.Ctx())
+		var vars pagination.Pagination
+		if err := c.Vars(&vars); err != nil {
+			return fmt.Errorf("failed to read pagination: %w", err)
+		}
+
+		response, err := s.GetAll(c.Ctx(), vars)
 		if err != nil {
 			return fmt.Errorf("failed to get all inspections: %w", err)
 		}
