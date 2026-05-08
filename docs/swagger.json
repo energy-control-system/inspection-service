@@ -1,561 +1,642 @@
 {
-    "swagger": "2.0",
+    "components": {
+        "schemas": {
+            "gorouter.ErrorInfo": {
+                "properties": {
+                    "code": {
+                        "type": "string"
+                    },
+                    "message": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "gorouter.ErrorResponse": {
+                "properties": {
+                    "error": {
+                        "$ref": "#/components/schemas/gorouter.ErrorInfo"
+                    }
+                },
+                "type": "object"
+            },
+            "inspection-service_service_inspection.Attachment": {
+                "properties": {
+                    "CreatedAt": {
+                        "type": "string"
+                    },
+                    "FileID": {
+                        "type": "integer"
+                    },
+                    "ID": {
+                        "type": "integer"
+                    },
+                    "InspectionID": {
+                        "type": "integer"
+                    },
+                    "Type": {
+                        "$ref": "#/components/schemas/inspection-service_service_inspection.AttachmentType"
+                    }
+                },
+                "type": "object"
+            },
+            "inspection-service_service_inspection.AttachmentType": {
+                "enum": [
+                    0,
+                    1,
+                    2,
+                    3
+                ],
+                "type": "integer",
+                "x-enum-varnames": [
+                    "AttachmentTypeUnknown",
+                    "AttachmentTypeDevicePhoto",
+                    "AttachmentTypeSealPhoto",
+                    "AttachmentTypeAct"
+                ]
+            },
+            "inspection-service_service_inspection.FinishInspectionRequest": {
+                "properties": {
+                    "EnergyActionAt": {
+                        "type": "string"
+                    },
+                    "ID": {
+                        "type": "integer"
+                    },
+                    "InspectedDevices": {
+                        "items": {
+                            "$ref": "#/components/schemas/inspection-service_service_inspection.InspectedDeviceRequest"
+                        },
+                        "type": "array",
+                        "uniqueItems": false
+                    },
+                    "IsExpenseAvailable": {
+                        "type": "boolean"
+                    },
+                    "IsRestrictionChecked": {
+                        "type": "boolean"
+                    },
+                    "IsUnauthorizedConsumers": {
+                        "type": "boolean"
+                    },
+                    "IsViolationDetected": {
+                        "type": "boolean"
+                    },
+                    "LimitReason": {
+                        "type": "string"
+                    },
+                    "Method": {
+                        "type": "string"
+                    },
+                    "MethodBy": {
+                        "$ref": "#/components/schemas/inspection-service_service_inspection.MethodBy"
+                    },
+                    "ReasonDescription": {
+                        "type": "string"
+                    },
+                    "ReasonType": {
+                        "$ref": "#/components/schemas/inspection-service_service_inspection.ReasonType"
+                    },
+                    "Resolution": {
+                        "$ref": "#/components/schemas/inspection-service_service_inspection.Resolution"
+                    },
+                    "Type": {
+                        "$ref": "#/components/schemas/inspection-service_service_inspection.Type"
+                    },
+                    "UnauthorizedDescription": {
+                        "type": "string"
+                    },
+                    "UnauthorizedExplanation": {
+                        "type": "string"
+                    },
+                    "ViolationDescription": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "inspection-service_service_inspection.InspectedDevice": {
+                "properties": {
+                    "consumption": {
+                        "type": "number"
+                    },
+                    "created_at": {
+                        "type": "string"
+                    },
+                    "device_id": {
+                        "type": "integer"
+                    },
+                    "id": {
+                        "type": "integer"
+                    },
+                    "inspection_id": {
+                        "type": "integer"
+                    },
+                    "value": {
+                        "type": "number"
+                    }
+                },
+                "type": "object"
+            },
+            "inspection-service_service_inspection.InspectedDeviceRequest": {
+                "properties": {
+                    "Consumption": {
+                        "type": "number"
+                    },
+                    "DeviceID": {
+                        "type": "integer"
+                    },
+                    "InspectedSeals": {
+                        "items": {
+                            "$ref": "#/components/schemas/inspection-service_service_inspection.InspectedSealRequest"
+                        },
+                        "type": "array",
+                        "uniqueItems": false
+                    },
+                    "Value": {
+                        "type": "number"
+                    }
+                },
+                "type": "object"
+            },
+            "inspection-service_service_inspection.InspectedSealRequest": {
+                "properties": {
+                    "IsBroken": {
+                        "type": "boolean"
+                    },
+                    "SealID": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "inspection-service_service_inspection.Inspection": {
+                "properties": {
+                    "CreatedAt": {
+                        "type": "string"
+                    },
+                    "EnergyActionAt": {
+                        "type": "string"
+                    },
+                    "ID": {
+                        "type": "integer"
+                    },
+                    "InspectAt": {
+                        "type": "string"
+                    },
+                    "InspectedDevices": {
+                        "items": {
+                            "$ref": "#/components/schemas/inspection-service_service_inspection.InspectedDevice"
+                        },
+                        "type": "array",
+                        "uniqueItems": false
+                    },
+                    "IsExpenseAvailable": {
+                        "type": "boolean"
+                    },
+                    "IsRestrictionChecked": {
+                        "type": "boolean"
+                    },
+                    "IsUnauthorizedConsumers": {
+                        "type": "boolean"
+                    },
+                    "IsViolationDetected": {
+                        "type": "boolean"
+                    },
+                    "LimitReason": {
+                        "type": "string"
+                    },
+                    "Method": {
+                        "type": "string"
+                    },
+                    "MethodBy": {
+                        "$ref": "#/components/schemas/inspection-service_service_inspection.MethodBy"
+                    },
+                    "ReasonDescription": {
+                        "type": "string"
+                    },
+                    "ReasonType": {
+                        "$ref": "#/components/schemas/inspection-service_service_inspection.ReasonType"
+                    },
+                    "Resolution": {
+                        "$ref": "#/components/schemas/inspection-service_service_inspection.Resolution"
+                    },
+                    "Status": {
+                        "$ref": "#/components/schemas/inspection-service_service_inspection.Status"
+                    },
+                    "TaskID": {
+                        "type": "integer"
+                    },
+                    "Type": {
+                        "$ref": "#/components/schemas/inspection-service_service_inspection.Type"
+                    },
+                    "UnauthorizedDescription": {
+                        "type": "string"
+                    },
+                    "UnauthorizedExplanation": {
+                        "type": "string"
+                    },
+                    "UpdatedAt": {
+                        "type": "string"
+                    },
+                    "ViolationDescription": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "inspection-service_service_inspection.MethodBy": {
+                "enum": [
+                    0,
+                    1,
+                    2
+                ],
+                "type": "integer",
+                "x-enum-varnames": [
+                    "MethodByUnknown",
+                    "MethodByConsumer",
+                    "MethodByInspector"
+                ]
+            },
+            "inspection-service_service_inspection.ReasonType": {
+                "enum": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4
+                ],
+                "type": "integer",
+                "x-enum-varnames": [
+                    "ReasonTypeUnknown",
+                    "ReasonTypeNotIntroduced",
+                    "ReasonTypeConsumerLimited",
+                    "ReasonTypeInspectorLimited",
+                    "ReasonTypeResumed"
+                ]
+            },
+            "inspection-service_service_inspection.Resolution": {
+                "enum": [
+                    0,
+                    1,
+                    2,
+                    3
+                ],
+                "type": "integer",
+                "x-enum-varnames": [
+                    "ResolutionUnknown",
+                    "ResolutionLimited",
+                    "ResolutionStopped",
+                    "ResolutionResumed"
+                ]
+            },
+            "inspection-service_service_inspection.Status": {
+                "enum": [
+                    0,
+                    1,
+                    2
+                ],
+                "type": "integer",
+                "x-enum-varnames": [
+                    "StatusUnknown",
+                    "StatusInWork",
+                    "StatusDone"
+                ]
+            },
+            "inspection-service_service_inspection.Type": {
+                "enum": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4
+                ],
+                "type": "integer",
+                "x-enum-varnames": [
+                    "TypeUnknown",
+                    "TypeLimitation",
+                    "TypeResumption",
+                    "TypeVerification",
+                    "TypeUnauthorizedConnection"
+                ]
+            }
+        }
+    },
     "info": {
         "description": "API for managing inspections, photos, and inspection completion.",
         "title": "Inspection Service API",
-        "contact": {},
         "version": "1.0"
     },
-    "basePath": "/api/inspection-service",
+    "externalDocs": {
+        "description": "",
+        "url": ""
+    },
     "paths": {
         "/inspections": {
             "get": {
                 "description": "Returns all inspections.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "inspections"
-                ],
-                "summary": "List inspections",
                 "parameters": [
                     {
-                        "type": "integer",
                         "description": "Maximum number of items to return; 0 means no limit",
+                        "in": "query",
                         "name": "limit",
-                        "in": "query"
+                        "schema": {
+                            "type": "integer"
+                        }
                     },
                     {
-                        "type": "integer",
                         "description": "Number of items to skip",
+                        "in": "query",
                         "name": "offset",
-                        "in": "query"
+                        "schema": {
+                            "type": "integer"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/inspection-service_service_inspection.Inspection"
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/inspection-service_service_inspection.Inspection"
+                                    },
+                                    "type": "array"
+                                }
                             }
-                        }
+                        },
+                        "description": "OK"
                     },
                     "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/gorouter.ErrorResponse"
-                        }
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/gorouter.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Bad Request"
                     },
                     "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/gorouter.ErrorResponse"
-                        }
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/gorouter.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Internal Server Error"
                     }
-                }
+                },
+                "summary": "List inspections",
+                "tags": [
+                    "inspections"
+                ]
             }
         },
         "/inspections/task/{taskID}": {
             "get": {
                 "description": "Returns an inspection linked to a task.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "inspections"
-                ],
-                "summary": "Get inspection by task ID",
                 "parameters": [
                     {
-                        "type": "integer",
                         "description": "Task ID",
-                        "name": "taskID",
                         "in": "path",
-                        "required": true
+                        "name": "taskID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/inspection-service_service_inspection.Inspection"
-                        }
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/inspection-service_service_inspection.Inspection"
+                                }
+                            }
+                        },
+                        "description": "OK"
                     },
                     "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/gorouter.ErrorResponse"
-                        }
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/gorouter.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Bad Request"
                     },
                     "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/gorouter.ErrorResponse"
-                        }
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/gorouter.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Not Found"
                     },
                     "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/gorouter.ErrorResponse"
-                        }
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/gorouter.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Internal Server Error"
                     }
-                }
+                },
+                "summary": "Get inspection by task ID",
+                "tags": [
+                    "inspections"
+                ]
             }
         },
         "/inspections/{id}/finish": {
             "patch": {
                 "description": "Saves inspection results, generated data, and completion state.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "inspections"
-                ],
-                "summary": "Finish inspection",
                 "parameters": [
                     {
-                        "type": "integer",
                         "description": "Inspection ID",
-                        "name": "id",
                         "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Inspection completion payload",
-                        "name": "request",
-                        "in": "body",
+                        "name": "id",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/inspection-service_service_inspection.FinishInspectionRequest"
+                            "type": "integer"
                         }
                     }
                 ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "oneOf": [
+                                    {
+                                        "type": "object"
+                                    },
+                                    {
+                                        "$ref": "#/components/schemas/inspection-service_service_inspection.FinishInspectionRequest",
+                                        "summary": "request",
+                                        "description": "Inspection completion payload"
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "description": "Inspection completion payload",
+                    "required": true
+                },
                 "responses": {
                     "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/inspection-service_service_inspection.Inspection"
-                        }
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/inspection-service_service_inspection.Inspection"
+                                }
+                            }
+                        },
+                        "description": "OK"
                     },
                     "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/gorouter.ErrorResponse"
-                        }
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/gorouter.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Bad Request"
                     },
                     "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/gorouter.ErrorResponse"
-                        }
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/gorouter.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Not Found"
                     },
                     "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/gorouter.ErrorResponse"
-                        }
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/gorouter.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Internal Server Error"
                     }
-                }
+                },
+                "summary": "Finish inspection",
+                "tags": [
+                    "inspections"
+                ]
             }
         },
         "/inspections/{id}/photo": {
             "post": {
                 "description": "Uploads one device or seal photo and attaches it to an inspection.",
-                "consumes": [
-                    "multipart/form-data"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "inspections"
-                ],
-                "summary": "Attach inspection photo",
                 "parameters": [
                     {
-                        "type": "integer",
                         "description": "Inspection ID",
-                        "name": "id",
                         "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "file",
-                        "description": "Inspection photo",
-                        "name": "Photo",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Attachment type: 1=device photo, 2=seal photo",
-                        "name": "AttachmentType",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Device ID, required when AttachmentType is 1",
-                        "name": "DeviceID",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Seal ID, required when AttachmentType is 2",
-                        "name": "SealID",
-                        "in": "formData"
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
                     }
                 ],
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "oneOf": [
+                                    {
+                                        "title": "Photo",
+                                        "type": "file"
+                                    },
+                                    {
+                                        "title": "AttachmentType",
+                                        "type": "integer"
+                                    },
+                                    {
+                                        "title": "DeviceID",
+                                        "type": "integer"
+                                    },
+                                    {
+                                        "title": "SealID",
+                                        "type": "integer"
+                                    }
+                                ]
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "description": "Inspection photo | Attachment type: 1=device photo, 2=seal photo | Device ID, required when AttachmentType is 1 | Seal ID, required when AttachmentType is 2"
+                },
                 "responses": {
                     "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/inspection-service_service_inspection.Attachment"
-                        }
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/inspection-service_service_inspection.Attachment"
+                                }
+                            }
+                        },
+                        "description": "OK"
                     },
                     "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/gorouter.ErrorResponse"
-                        }
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/gorouter.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Bad Request"
                     },
                     "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/gorouter.ErrorResponse"
-                        }
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/gorouter.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Not Found"
                     },
                     "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/gorouter.ErrorResponse"
-                        }
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/gorouter.ErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Internal Server Error"
                     }
-                }
+                },
+                "summary": "Attach inspection photo",
+                "tags": [
+                    "inspections"
+                ]
             }
         }
     },
-    "definitions": {
-        "gorouter.ErrorInfo": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "string"
-                },
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
-        "gorouter.ErrorResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "$ref": "#/definitions/gorouter.ErrorInfo"
-                }
-            }
-        },
-        "inspection-service_service_inspection.Attachment": {
-            "type": "object",
-            "properties": {
-                "CreatedAt": {
-                    "type": "string"
-                },
-                "FileID": {
-                    "type": "integer"
-                },
-                "ID": {
-                    "type": "integer"
-                },
-                "InspectionID": {
-                    "type": "integer"
-                },
-                "Type": {
-                    "$ref": "#/definitions/inspection-service_service_inspection.AttachmentType"
-                }
-            }
-        },
-        "inspection-service_service_inspection.AttachmentType": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2,
-                3
-            ],
-            "x-enum-varnames": [
-                "AttachmentTypeUnknown",
-                "AttachmentTypeDevicePhoto",
-                "AttachmentTypeSealPhoto",
-                "AttachmentTypeAct"
-            ]
-        },
-        "inspection-service_service_inspection.FinishInspectionRequest": {
-            "type": "object",
-            "properties": {
-                "EnergyActionAt": {
-                    "type": "string"
-                },
-                "ID": {
-                    "type": "integer"
-                },
-                "InspectedDevices": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/inspection.InspectedDeviceRequest"
-                    }
-                },
-                "IsExpenseAvailable": {
-                    "type": "boolean"
-                },
-                "IsRestrictionChecked": {
-                    "type": "boolean"
-                },
-                "IsUnauthorizedConsumers": {
-                    "type": "boolean"
-                },
-                "IsViolationDetected": {
-                    "type": "boolean"
-                },
-                "LimitReason": {
-                    "type": "string"
-                },
-                "Method": {
-                    "type": "string"
-                },
-                "MethodBy": {
-                    "$ref": "#/definitions/inspection-service_service_inspection.MethodBy"
-                },
-                "ReasonDescription": {
-                    "type": "string"
-                },
-                "ReasonType": {
-                    "$ref": "#/definitions/inspection-service_service_inspection.ReasonType"
-                },
-                "Resolution": {
-                    "$ref": "#/definitions/inspection-service_service_inspection.Resolution"
-                },
-                "Type": {
-                    "$ref": "#/definitions/inspection-service_service_inspection.Type"
-                },
-                "UnauthorizedDescription": {
-                    "type": "string"
-                },
-                "UnauthorizedExplanation": {
-                    "type": "string"
-                },
-                "ViolationDescription": {
-                    "type": "string"
-                }
-            }
-        },
-        "inspection-service_service_inspection.InspectedDevice": {
-            "type": "object",
-            "properties": {
-                "consumption": {
-                    "type": "number"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "device_id": {
-                    "type": "integer"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "inspection_id": {
-                    "type": "integer"
-                },
-                "value": {
-                    "type": "number"
-                }
-            }
-        },
-        "inspection-service_service_inspection.Inspection": {
-            "type": "object",
-            "properties": {
-                "CreatedAt": {
-                    "type": "string"
-                },
-                "EnergyActionAt": {
-                    "type": "string"
-                },
-                "ID": {
-                    "type": "integer"
-                },
-                "InspectAt": {
-                    "type": "string"
-                },
-                "InspectedDevices": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/inspection-service_service_inspection.InspectedDevice"
-                    }
-                },
-                "IsExpenseAvailable": {
-                    "type": "boolean"
-                },
-                "IsRestrictionChecked": {
-                    "type": "boolean"
-                },
-                "IsUnauthorizedConsumers": {
-                    "type": "boolean"
-                },
-                "IsViolationDetected": {
-                    "type": "boolean"
-                },
-                "LimitReason": {
-                    "type": "string"
-                },
-                "Method": {
-                    "type": "string"
-                },
-                "MethodBy": {
-                    "$ref": "#/definitions/inspection-service_service_inspection.MethodBy"
-                },
-                "ReasonDescription": {
-                    "type": "string"
-                },
-                "ReasonType": {
-                    "$ref": "#/definitions/inspection-service_service_inspection.ReasonType"
-                },
-                "Resolution": {
-                    "$ref": "#/definitions/inspection-service_service_inspection.Resolution"
-                },
-                "Status": {
-                    "$ref": "#/definitions/inspection-service_service_inspection.Status"
-                },
-                "TaskID": {
-                    "type": "integer"
-                },
-                "Type": {
-                    "$ref": "#/definitions/inspection-service_service_inspection.Type"
-                },
-                "UnauthorizedDescription": {
-                    "type": "string"
-                },
-                "UnauthorizedExplanation": {
-                    "type": "string"
-                },
-                "UpdatedAt": {
-                    "type": "string"
-                },
-                "ViolationDescription": {
-                    "type": "string"
-                }
-            }
-        },
-        "inspection-service_service_inspection.MethodBy": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2
-            ],
-            "x-enum-varnames": [
-                "MethodByUnknown",
-                "MethodByConsumer",
-                "MethodByInspector"
-            ]
-        },
-        "inspection-service_service_inspection.ReasonType": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2,
-                3,
-                4
-            ],
-            "x-enum-varnames": [
-                "ReasonTypeUnknown",
-                "ReasonTypeNotIntroduced",
-                "ReasonTypeConsumerLimited",
-                "ReasonTypeInspectorLimited",
-                "ReasonTypeResumed"
-            ]
-        },
-        "inspection-service_service_inspection.Resolution": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2,
-                3
-            ],
-            "x-enum-varnames": [
-                "ResolutionUnknown",
-                "ResolutionLimited",
-                "ResolutionStopped",
-                "ResolutionResumed"
-            ]
-        },
-        "inspection-service_service_inspection.Status": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2
-            ],
-            "x-enum-varnames": [
-                "StatusUnknown",
-                "StatusInWork",
-                "StatusDone"
-            ]
-        },
-        "inspection-service_service_inspection.Type": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2,
-                3,
-                4
-            ],
-            "x-enum-varnames": [
-                "TypeUnknown",
-                "TypeLimitation",
-                "TypeResumption",
-                "TypeVerification",
-                "TypeUnauthorizedConnection"
-            ]
-        },
-        "inspection.InspectedDeviceRequest": {
-            "type": "object",
-            "properties": {
-                "Consumption": {
-                    "type": "number"
-                },
-                "DeviceID": {
-                    "type": "integer"
-                },
-                "InspectedSeals": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/inspection.InspectedSealRequest"
-                    }
-                },
-                "Value": {
-                    "type": "number"
-                }
-            }
-        },
-        "inspection.InspectedSealRequest": {
-            "type": "object",
-            "properties": {
-                "IsBroken": {
-                    "type": "boolean"
-                },
-                "SealID": {
-                    "type": "integer"
-                }
-            }
+    "openapi": "3.1.0",
+    "servers": [
+        {
+            "url": "/api/inspection-service"
         }
-    }
+    ]
 }

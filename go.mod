@@ -6,8 +6,8 @@ require (
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/lukasjarosch/go-docx v0.5.0
 	github.com/shopspring/decimal v1.4.0
-	github.com/sunshineOfficial/golib v0.0.20
-	github.com/swaggo/swag v1.16.6
+	github.com/sunshineOfficial/golib v0.0.21
+	github.com/swaggo/swag/v2 v2.0.0-rc5
 )
 
 require (
@@ -75,8 +75,7 @@ require (
 	github.com/segmentio/asm v1.2.0 // indirect
 	github.com/segmentio/kafka-go v0.4.49 // indirect
 	github.com/sethvargo/go-retry v0.3.0 // indirect
-	github.com/swaggo/files/v2 v2.0.2 // indirect
-	github.com/swaggo/http-swagger/v2 v2.0.2 // indirect
+	github.com/sv-tools/openapi v0.4.0 // indirect
 	github.com/tinylib/msgp v1.3.0 // indirect
 	github.com/uptrace/opentelemetry-go-extra/otelsql v0.3.2 // indirect
 	github.com/uptrace/opentelemetry-go-extra/otelsqlx v0.3.2 // indirect
@@ -97,7 +96,6 @@ require (
 	go.yaml.in/yaml/v2 v2.4.2 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/crypto v0.42.0 // indirect
-	golang.org/x/mod v0.28.0 // indirect
 	golang.org/x/net v0.44.0 // indirect
 	golang.org/x/sync v0.17.0 // indirect
 	golang.org/x/sys v0.36.0 // indirect
