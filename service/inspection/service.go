@@ -2,6 +2,7 @@ package inspection
 
 import (
 	"bytes"
+	"database/sql"
 	"errors"
 	"fmt"
 	"inspection-service/cluster/file"
@@ -64,6 +65,32 @@ func (s *Service) GetByTaskID(ctx goctx.Context, taskID int) (Inspection, error)
 	}
 
 	return ins, nil
+}
+
+func (s *Service) GetByBrigade(ctx goctx.Context, brigadeID int, page pagination.Pagination) ([]Inspection, error) {
+	if err := page.Validate(); err != nil {
+		return nil, fmt.Errorf("validate pagination: %w", err)
+	}
+
+	tasks, err := s.taskService.GetTasksByBrigade(ctx, brigadeID, page)
+	if err != nil {
+		return nil, fmt.Errorf("get tasks by brigade id: %w", err)
+	}
+
+	inspections := make([]Inspection, 0, len(tasks))
+	for _, t := range tasks {
+		ins, iErr := s.repository.GetByTaskID(ctx, t.ID)
+		if errors.Is(iErr, sql.ErrNoRows) {
+			continue
+		}
+		if iErr != nil {
+			return nil, fmt.Errorf("get inspection by task id %d: %w", t.ID, iErr)
+		}
+
+		inspections = append(inspections, ins)
+	}
+
+	return inspections, nil
 }
 
 func (s *Service) AttachPhoto(ctx goctx.Context, log golog.Logger, request AttachPhotoRequest) (Attachment, error) {

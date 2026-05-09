@@ -96,12 +96,12 @@ type Attachment struct {
 }
 
 type InspectedDevice struct {
-	ID           int             `json:"id"`
-	DeviceID     int             `json:"device_id"`
-	InspectionID int             `json:"inspection_id"`
-	Value        decimal.Decimal `json:"value"`
-	Consumption  decimal.Decimal `json:"consumption"`
-	CreatedAt    time.Time       `json:"created_at"`
+	ID           int             `json:"ID"`
+	DeviceID     int             `json:"DeviceID"`
+	InspectionID int             `json:"InspectionID"`
+	Value        decimal.Decimal `json:"Value"`
+	Consumption  decimal.Decimal `json:"Consumption"`
+	CreatedAt    time.Time       `json:"CreatedAt"`
 }
 
 type AttachPhotoRequest struct {

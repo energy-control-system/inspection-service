@@ -40,6 +40,7 @@ type FileService interface {
 
 type TaskService interface {
 	GetTaskByID(ctx goctx.Context, id int) (task.Task, error)
+	GetTasksByBrigade(ctx goctx.Context, brigadeID int, page pagination.Pagination) ([]task.Task, error)
 }
 
 type BrigadeService interface {

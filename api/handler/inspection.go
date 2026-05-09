@@ -68,6 +68,43 @@ func GetInspectionByTaskID(s *inspection.Service) gorouter.Handler {
 	}
 }
 
+type brigadeIDVars struct {
+	BrigadeID int `path:"brigadeID"`
+}
+
+// GetInspectionsByBrigade godoc
+// @Summary List brigade inspections
+// @Description Returns inspections linked to tasks assigned to a brigade.
+// @Tags inspections
+// @Produce json
+// @Param brigadeID path int true "Brigade ID"
+// @Param limit query int false "Maximum number of items to return; 0 means no limit"
+// @Param offset query int false "Number of items to skip"
+// @Success 200 {array} inspection.Inspection
+// @Failure 400 {object} gorouter.ErrorResponse
+// @Failure 500 {object} gorouter.ErrorResponse
+// @Router /inspections/brigades/{brigadeID} [get]
+func GetInspectionsByBrigade(s *inspection.Service) gorouter.Handler {
+	return func(c gorouter.Context) error {
+		var vars brigadeIDVars
+		if err := c.Vars(&vars); err != nil {
+			return fmt.Errorf("failed to read brigade id: %w", err)
+		}
+
+		var pageVars pagination.Pagination
+		if err := c.Vars(&pageVars); err != nil {
+			return fmt.Errorf("failed to read pagination: %w", err)
+		}
+
+		response, err := s.GetByBrigade(c.Ctx(), vars.BrigadeID, pageVars)
+		if err != nil {
+			return fmt.Errorf("failed to get inspections by brigade id: %w", err)
+		}
+
+		return c.WriteJson(http.StatusOK, response)
+	}
+}
+
 type inspectionIDVars struct {
 	ID int `path:"id"`
 }

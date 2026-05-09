@@ -38,6 +38,7 @@ func (s *ServerBuilder) AddInspections(service *inspection.Service) {
 	r := s.router.SubRouter("/inspections")
 	r.HandleGet("", handler.GetAllInspections(service))
 	r.HandleGet("/task/{taskID}", handler.GetInspectionByTaskID(service))
+	r.HandleGet("/brigades/{brigadeID}", handler.GetInspectionsByBrigade(service))
 	r.HandlePost("/{id}/photo", handler.AttachPhotoToInspection(service))
 	r.HandlePatch("/{id}/finish", handler.FinishInspection(service))
 }
