@@ -31,6 +31,11 @@ func (r *Repository) GetAll(ctx context.Context, page pagination.Pagination) ([]
 		return nil, fmt.Errorf("r.db.SelectContext: %w", err)
 	}
 
+	err = r.attachAttachments(ctx, inspections)
+	if err != nil {
+		return nil, fmt.Errorf("attach attachments: %w", err)
+	}
+
 	return MapSliceFromDB(inspections), nil
 }
 
@@ -45,6 +50,11 @@ func (r *Repository) GetByTaskID(ctx context.Context, taskID int) (inspection.In
 	}
 
 	result := MapFromDB(ins)
+	result.Attachments, err = r.getAttachmentsByInspectionID(ctx, ins.ID)
+	if err != nil {
+		return inspection.Inspection{}, fmt.Errorf("get attachments by inspection id: %w", err)
+	}
+
 	result.InspectedDevices, err = r.getDevicesByInspectionID(ctx, ins.ID)
 	if err != nil {
 		return inspection.Inspection{}, fmt.Errorf("get devices by inspection id: %w", err)
@@ -64,6 +74,62 @@ func (r *Repository) getDevicesByInspectionID(ctx context.Context, inspectionID 
 	}
 
 	return MapInspectedDevicesSliceFromDB(devices), nil
+}
+
+//go:embed sql/get_attachments_by_inspection_ids.sql
+var getAttachmentsByInspectionIDsSQL string
+
+func (r *Repository) getAttachmentsByInspectionID(ctx context.Context, inspectionID int) ([]inspection.Attachment, error) {
+	attachments, err := r.getAttachmentsByInspectionIDs(ctx, []int{inspectionID})
+	if err != nil {
+		return nil, err
+	}
+
+	return MapAttachmentsSliceFromDB(attachments), nil
+}
+
+func (r *Repository) attachAttachments(ctx context.Context, inspections []Inspection) error {
+	if len(inspections) == 0 {
+		return nil
+	}
+
+	inspectionIDs := make([]int, 0, len(inspections))
+	for _, ins := range inspections {
+		inspectionIDs = append(inspectionIDs, ins.ID)
+	}
+
+	attachments, err := r.getAttachmentsByInspectionIDs(ctx, inspectionIDs)
+	if err != nil {
+		return err
+	}
+
+	attachmentsByInspectionID := make(map[int][]Attachment, len(inspections))
+	for _, attachment := range attachments {
+		attachmentsByInspectionID[attachment.InspectionID] = append(attachmentsByInspectionID[attachment.InspectionID], attachment)
+	}
+
+	for i := range inspections {
+		inspections[i].Attachments = attachmentsByInspectionID[inspections[i].ID]
+	}
+
+	return nil
+}
+
+func (r *Repository) getAttachmentsByInspectionIDs(ctx context.Context, inspectionIDs []int) ([]Attachment, error) {
+	query, args, err := sqlx.In(getAttachmentsByInspectionIDsSQL, inspectionIDs)
+	if err != nil {
+		return nil, fmt.Errorf("sqlx.In: %w", err)
+	}
+
+	query = r.db.Rebind(query)
+
+	var attachments []Attachment
+	err = r.db.SelectContext(ctx, &attachments, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("r.db.SelectContext: %w", err)
+	}
+
+	return attachments, nil
 }
 
 //go:embed sql/add_attachment.sql
@@ -89,7 +155,13 @@ func (r *Repository) GetByID(ctx context.Context, id int) (inspection.Inspection
 		return inspection.Inspection{}, fmt.Errorf("r.db.GetContext: %w", err)
 	}
 
-	return MapFromDB(ins), nil
+	result := MapFromDB(ins)
+	result.Attachments, err = r.getAttachmentsByInspectionID(ctx, ins.ID)
+	if err != nil {
+		return inspection.Inspection{}, fmt.Errorf("get attachments by inspection id: %w", err)
+	}
+
+	return result, nil
 }
 
 //go:embed sql/get_previous_device_inspections.sql
@@ -137,7 +209,10 @@ func (r *Repository) StartInspection(ctx context.Context, taskID int) (inspectio
 		return inspection.Inspection{}, fmt.Errorf("r.db.GetContext: %w", err)
 	}
 
-	return MapFromDB(ins), nil
+	result := MapFromDB(ins)
+	result.Attachments = []inspection.Attachment{}
+
+	return result, nil
 }
 
 //go:embed sql/finish_inspection.sql
@@ -168,5 +243,11 @@ func (r *Repository) FinishInspection(ctx context.Context, request inspection.Fi
 		return inspection.Inspection{}, fmt.Errorf("rows.Err: %w", err)
 	}
 
-	return MapFromDB(ins), err
+	result := MapFromDB(ins)
+	result.Attachments, err = r.getAttachmentsByInspectionID(ctx, ins.ID)
+	if err != nil {
+		return inspection.Inspection{}, fmt.Errorf("get attachments by inspection id: %w", err)
+	}
+
+	return result, err
 }

@@ -51,8 +51,9 @@ type Inspection struct {
 	UnauthorizedExplanation *string    `db:"unauthorized_explanation"`
 	InspectAt               *time.Time `db:"inspect_at"`
 	EnergyActionAt          *time.Time `db:"energy_action_at"`
-	CreatedAt               time.Time  `db:"created_at"`
-	UpdatedAt               time.Time  `db:"updated_at"`
+	Attachments             []Attachment
+	CreatedAt               time.Time `db:"created_at"`
+	UpdatedAt               time.Time `db:"updated_at"`
 }
 
 type FinishInspectionRequest struct {

@@ -73,6 +73,7 @@ type Inspection struct {
 	InspectAt               *time.Time        `json:"InspectAt,omitempty"`
 	EnergyActionAt          *time.Time        `json:"EnergyActionAt,omitempty"`
 	InspectedDevices        []InspectedDevice `json:"InspectedDevices,omitempty"`
+	Attachments             []Attachment      `json:"Attachments"`
 	CreatedAt               time.Time         `json:"CreatedAt"`
 	UpdatedAt               time.Time         `json:"UpdatedAt"`
 }

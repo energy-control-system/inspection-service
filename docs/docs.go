@@ -72,7 +72,7 @@ const docTemplate = `{
                     },
                     "InspectedDevices": {
                         "items": {
-                            "$ref": "#/components/schemas/inspection-service_service_inspection.InspectedDeviceRequest"
+                            "$ref": "#/components/schemas/inspection.InspectedDeviceRequest"
                         },
                         "type": "array",
                         "uniqueItems": false
@@ -145,40 +145,15 @@ const docTemplate = `{
                 },
                 "type": "object"
             },
-            "inspection-service_service_inspection.InspectedDeviceRequest": {
+            "inspection-service_service_inspection.Inspection": {
                 "properties": {
-                    "Consumption": {
-                        "type": "number"
-                    },
-                    "DeviceID": {
-                        "type": "integer"
-                    },
-                    "InspectedSeals": {
+                    "Attachments": {
                         "items": {
-                            "$ref": "#/components/schemas/inspection-service_service_inspection.InspectedSealRequest"
+                            "$ref": "#/components/schemas/inspection-service_service_inspection.Attachment"
                         },
                         "type": "array",
                         "uniqueItems": false
                     },
-                    "Value": {
-                        "type": "number"
-                    }
-                },
-                "type": "object"
-            },
-            "inspection-service_service_inspection.InspectedSealRequest": {
-                "properties": {
-                    "IsBroken": {
-                        "type": "boolean"
-                    },
-                    "SealID": {
-                        "type": "integer"
-                    }
-                },
-                "type": "object"
-            },
-            "inspection-service_service_inspection.Inspection": {
-                "properties": {
                     "CreatedAt": {
                         "type": "string"
                     },
@@ -326,6 +301,38 @@ const docTemplate = `{
                     "TypeVerification",
                     "TypeUnauthorizedConnection"
                 ]
+            },
+            "inspection.InspectedDeviceRequest": {
+                "properties": {
+                    "Consumption": {
+                        "type": "number"
+                    },
+                    "DeviceID": {
+                        "type": "integer"
+                    },
+                    "InspectedSeals": {
+                        "items": {
+                            "$ref": "#/components/schemas/inspection.InspectedSealRequest"
+                        },
+                        "type": "array",
+                        "uniqueItems": false
+                    },
+                    "Value": {
+                        "type": "number"
+                    }
+                },
+                "type": "object"
+            },
+            "inspection.InspectedSealRequest": {
+                "properties": {
+                    "IsBroken": {
+                        "type": "boolean"
+                    },
+                    "SealID": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
             }
         }
     },

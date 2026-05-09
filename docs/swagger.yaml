@@ -45,7 +45,7 @@ components:
           type: integer
         InspectedDevices:
           items:
-            $ref: '#/components/schemas/inspection-service_service_inspection.InspectedDeviceRequest'
+            $ref: '#/components/schemas/inspection.InspectedDeviceRequest'
           type: array
           uniqueItems: false
         IsExpenseAvailable:
@@ -92,29 +92,13 @@ components:
         value:
           type: number
       type: object
-    inspection-service_service_inspection.InspectedDeviceRequest:
-      properties:
-        Consumption:
-          type: number
-        DeviceID:
-          type: integer
-        InspectedSeals:
-          items:
-            $ref: '#/components/schemas/inspection-service_service_inspection.InspectedSealRequest'
-          type: array
-          uniqueItems: false
-        Value:
-          type: number
-      type: object
-    inspection-service_service_inspection.InspectedSealRequest:
-      properties:
-        IsBroken:
-          type: boolean
-        SealID:
-          type: integer
-      type: object
     inspection-service_service_inspection.Inspection:
       properties:
+        Attachments:
+          items:
+            $ref: '#/components/schemas/inspection-service_service_inspection.Attachment'
+          type: array
+          uniqueItems: false
         CreatedAt:
           type: string
         EnergyActionAt:
@@ -223,6 +207,27 @@ components:
       - TypeResumption
       - TypeVerification
       - TypeUnauthorizedConnection
+    inspection.InspectedDeviceRequest:
+      properties:
+        Consumption:
+          type: number
+        DeviceID:
+          type: integer
+        InspectedSeals:
+          items:
+            $ref: '#/components/schemas/inspection.InspectedSealRequest'
+          type: array
+          uniqueItems: false
+        Value:
+          type: number
+      type: object
+    inspection.InspectedSealRequest:
+      properties:
+        IsBroken:
+          type: boolean
+        SealID:
+          type: integer
+      type: object
 externalDocs:
   description: ""
   url: ""

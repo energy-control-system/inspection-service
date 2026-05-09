@@ -25,6 +25,7 @@ func MapFromDB(i Inspection) inspection.Inspection {
 		UnauthorizedExplanation: i.UnauthorizedExplanation,
 		InspectAt:               i.InspectAt,
 		EnergyActionAt:          i.EnergyActionAt,
+		Attachments:             MapAttachmentsSliceFromDB(i.Attachments),
 		CreatedAt:               i.CreatedAt,
 		UpdatedAt:               i.UpdatedAt,
 	}
@@ -68,6 +69,15 @@ func MapAttachmentFromDB(a Attachment) inspection.Attachment {
 		FileID:       a.FileID,
 		CreatedAt:    a.CreatedAt,
 	}
+}
+
+func MapAttachmentsSliceFromDB(attachments []Attachment) []inspection.Attachment {
+	result := make([]inspection.Attachment, 0, len(attachments))
+	for _, attachment := range attachments {
+		result = append(result, MapAttachmentFromDB(attachment))
+	}
+
+	return result
 }
 
 func MapInspectedDeviceFromDB(d InspectedDevice) inspection.InspectedDevice {
