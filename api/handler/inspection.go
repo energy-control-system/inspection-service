@@ -208,7 +208,6 @@ func AttachPhotoToInspection(s *inspection.Service) gorouter.Handler {
 // @Summary Finish inspection
 // @Description Saves inspection results, generated data, and completion state.
 // @Tags inspections
-// @Accept json
 // @Produce json
 // @Param id path int true "Inspection ID"
 // @Param request body inspection.FinishInspectionRequest true "Inspection completion payload"

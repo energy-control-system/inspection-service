@@ -559,16 +559,9 @@ const docTemplate = `{
                     "content": {
                         "application/json": {
                             "schema": {
-                                "oneOf": [
-                                    {
-                                        "type": "object"
-                                    },
-                                    {
-                                        "$ref": "#/components/schemas/inspection-service_service_inspection.FinishInspectionRequest",
-                                        "summary": "request",
-                                        "description": "Inspection completion payload"
-                                    }
-                                ]
+                                "$ref": "#/components/schemas/inspection-service_service_inspection.FinishInspectionRequest",
+                                "summary": "request",
+                                "description": "Inspection completion payload"
                             }
                         }
                     },

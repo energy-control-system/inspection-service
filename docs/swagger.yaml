@@ -289,11 +289,9 @@ paths:
         content:
           application/json:
             schema:
-              oneOf:
-              - type: object
-              - $ref: '#/components/schemas/inspection-service_service_inspection.FinishInspectionRequest'
-                description: Inspection completion payload
-                summary: request
+              $ref: '#/components/schemas/inspection-service_service_inspection.FinishInspectionRequest'
+              description: Inspection completion payload
+              summary: request
         description: Inspection completion payload
         required: true
       responses:
