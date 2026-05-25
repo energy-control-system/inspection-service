@@ -67,6 +67,15 @@ func (s *Service) GetByTaskID(ctx goctx.Context, taskID int) (Inspection, error)
 	return ins, nil
 }
 
+func (s *Service) GetByID(ctx goctx.Context, id int) (Inspection, error) {
+	ins, err := s.repository.GetByID(ctx, id)
+	if err != nil {
+		return Inspection{}, fmt.Errorf("get inspection by id: %w", err)
+	}
+
+	return ins, nil
+}
+
 func (s *Service) GetByBrigade(ctx goctx.Context, brigadeID int, page pagination.Pagination) ([]Inspection, error) {
 	if err := page.Validate(); err != nil {
 		return nil, fmt.Errorf("validate pagination: %w", err)

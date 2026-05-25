@@ -109,6 +109,33 @@ type inspectionIDVars struct {
 	ID int `path:"id"`
 }
 
+// GetInspectionByID godoc
+// @Summary Get inspection by ID
+// @Description Returns an inspection by its ID.
+// @Tags inspections
+// @Produce json
+// @Param id path int true "Inspection ID"
+// @Success 200 {object} inspection.Inspection
+// @Failure 400 {object} gorouter.ErrorResponse
+// @Failure 404 {object} gorouter.ErrorResponse
+// @Failure 500 {object} gorouter.ErrorResponse
+// @Router /inspections/{id} [get]
+func GetInspectionByID(s *inspection.Service) gorouter.Handler {
+	return func(c gorouter.Context) error {
+		var vars inspectionIDVars
+		if err := c.Vars(&vars); err != nil {
+			return fmt.Errorf("failed to read inspection id: %w", err)
+		}
+
+		response, err := s.GetByID(c.Ctx(), vars.ID)
+		if err != nil {
+			return fmt.Errorf("failed to get inspection by id: %w", err)
+		}
+
+		return c.WriteJson(http.StatusOK, response)
+	}
+}
+
 // AttachPhotoToInspection godoc
 // @Summary Attach inspection photo
 // @Description Uploads one device or seal photo and attaches it to an inspection.

@@ -13,6 +13,7 @@ import (
 
 type repositoryMock struct {
 	inspectionsByTaskID map[int]Inspection
+	inspectionsByID     map[int]Inspection
 }
 
 func (m repositoryMock) GetAll(context.Context, pagination.Pagination) ([]Inspection, error) {
@@ -32,8 +33,13 @@ func (m repositoryMock) AddAttachment(context.Context, int, int, AttachmentType)
 	return Attachment{}, nil
 }
 
-func (m repositoryMock) GetByID(context.Context, int) (Inspection, error) {
-	return Inspection{}, nil
+func (m repositoryMock) GetByID(_ context.Context, id int) (Inspection, error) {
+	ins, ok := m.inspectionsByID[id]
+	if !ok {
+		return Inspection{}, sql.ErrNoRows
+	}
+
+	return ins, nil
 }
 
 func (m repositoryMock) GetPreviousDeviceInspections(context.Context, int, int) ([]InspectedDevice, error) {
@@ -105,5 +111,30 @@ func TestGetByBrigadeReturnsInspectionsForBrigadeTasks(t *testing.T) {
 	}
 	if taskService.gotPage != page {
 		t.Fatalf("taskService.gotPage = %+v, want %+v", taskService.gotPage, page)
+	}
+}
+
+func TestGetByIDReturnsInspection(t *testing.T) {
+	service := &Service{
+		repository: repositoryMock{
+			inspectionsByID: map[int]Inspection{
+				42: {ID: 42, TaskID: 7, Status: StatusInWork},
+			},
+		},
+	}
+
+	got, err := service.GetByID(goctx.Wrap(context.Background()), 42)
+	if err != nil {
+		t.Fatalf("GetByID returned error: %v", err)
+	}
+
+	if got.ID != 42 {
+		t.Fatalf("got.ID = %d, want 42", got.ID)
+	}
+	if got.TaskID != 7 {
+		t.Fatalf("got.TaskID = %d, want 7", got.TaskID)
+	}
+	if got.Status != StatusInWork {
+		t.Fatalf("got.Status = %d, want %d", got.Status, StatusInWork)
 	}
 }

@@ -275,6 +275,44 @@ paths:
       summary: List inspections
       tags:
       - inspections
+  /inspections/{id}:
+    get:
+      description: Returns an inspection by its ID.
+      parameters:
+      - description: Inspection ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inspection-service_service_inspection.Inspection'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/gorouter.ErrorResponse'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/gorouter.ErrorResponse'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/gorouter.ErrorResponse'
+          description: Internal Server Error
+      summary: Get inspection by ID
+      tags:
+      - inspections
   /inspections/{id}/finish:
     patch:
       description: Saves inspection results, generated data, and completion state.
