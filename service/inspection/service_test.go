@@ -77,16 +77,18 @@ func (m *taskServiceMock) GetTasksByBrigade(_ goctx.Context, brigadeID int, page
 }
 
 type fileServiceMock struct {
-	filesByID map[int]clusterfile.File
-	gotIDs    []int
+	filesByID  map[int]clusterfile.File
+	gotIDs     []int
+	gotHeaders clusterfile.ForwardedHeaders
 }
 
-func (m *fileServiceMock) Upload(goctx.Context, string, io.Reader) (clusterfile.File, error) {
+func (m *fileServiceMock) Upload(goctx.Context, string, io.Reader, clusterfile.ForwardedHeaders) (clusterfile.File, error) {
 	return clusterfile.File{}, nil
 }
 
-func (m *fileServiceMock) GetByIDs(_ goctx.Context, ids []int, page pagination.Pagination) ([]clusterfile.File, error) {
+func (m *fileServiceMock) GetByIDs(_ goctx.Context, ids []int, page pagination.Pagination, headers clusterfile.ForwardedHeaders) ([]clusterfile.File, error) {
 	m.gotIDs = append([]int(nil), ids...)
+	m.gotHeaders = headers
 
 	files := make([]clusterfile.File, 0, len(ids))
 	for _, id := range ids {
@@ -121,7 +123,7 @@ func TestGetByBrigadeReturnsInspectionsForBrigadeTasks(t *testing.T) {
 	}
 
 	page := pagination.Pagination{Limit: 2, Offset: 4}
-	got, err := service.GetByBrigade(goctx.Wrap(context.Background()), 7, page)
+	got, err := service.GetByBrigade(goctx.Wrap(context.Background()), 7, page, clusterfile.ForwardedHeaders{})
 	if err != nil {
 		t.Fatalf("GetByBrigade returned error: %v", err)
 	}
@@ -170,7 +172,8 @@ func TestGetAllReturnsAttachmentFileURLs(t *testing.T) {
 		fileService: fileService,
 	}
 
-	got, err := service.GetAll(goctx.Wrap(context.Background()), pagination.Pagination{})
+	headers := clusterfile.ForwardedHeaders{Host: "api.example.test", Proto: "https"}
+	got, err := service.GetAll(goctx.Wrap(context.Background()), pagination.Pagination{}, headers)
 	if err != nil {
 		t.Fatalf("GetAll returned error: %v", err)
 	}
@@ -183,6 +186,9 @@ func TestGetAllReturnsAttachmentFileURLs(t *testing.T) {
 	}
 	if len(fileService.gotIDs) != 2 || fileService.gotIDs[0] != 70 || fileService.gotIDs[1] != 80 {
 		t.Fatalf("fileService.gotIDs = %+v, want [70 80]", fileService.gotIDs)
+	}
+	if fileService.gotHeaders != headers {
+		t.Fatalf("fileService.gotHeaders = %+v, want %+v", fileService.gotHeaders, headers)
 	}
 }
 
@@ -209,7 +215,8 @@ func TestGetByIDReturnsInspection(t *testing.T) {
 		fileService: fileService,
 	}
 
-	got, err := service.GetByID(goctx.Wrap(context.Background()), 42)
+	headers := clusterfile.ForwardedHeaders{Host: "api.example.test", Proto: "https"}
+	got, err := service.GetByID(goctx.Wrap(context.Background()), 42, headers)
 	if err != nil {
 		t.Fatalf("GetByID returned error: %v", err)
 	}
@@ -228,5 +235,8 @@ func TestGetByIDReturnsInspection(t *testing.T) {
 	}
 	if len(fileService.gotIDs) != 1 || fileService.gotIDs[0] != 70 {
 		t.Fatalf("fileService.gotIDs = %+v, want [70]", fileService.gotIDs)
+	}
+	if fileService.gotHeaders != headers {
+		t.Fatalf("fileService.gotHeaders = %+v, want %+v", fileService.gotHeaders, headers)
 	}
 }

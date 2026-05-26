@@ -1,6 +1,7 @@
 package inspection
 
 import (
+	"inspection-service/cluster/file"
 	"mime/multipart"
 	"time"
 
@@ -111,6 +112,7 @@ type AttachPhotoRequest struct {
 	DeviceID     int
 	SealID       int
 	FileHeader   *multipart.FileHeader
+	FileHeaders  file.ForwardedHeaders
 }
 
 type FinishInspectionRequest struct {

@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	clusterfile "inspection-service/cluster/file"
 	"inspection-service/service/inspection"
 	"net/http"
 	"strconv"
@@ -28,7 +29,7 @@ func GetAllInspections(s *inspection.Service) gorouter.Handler {
 			return fmt.Errorf("failed to read pagination: %w", err)
 		}
 
-		response, err := s.GetAll(c.Ctx(), vars)
+		response, err := s.GetAll(c.Ctx(), vars, clusterfile.NewForwardedHeaders(c.Request()))
 		if err != nil {
 			return fmt.Errorf("failed to get all inspections: %w", err)
 		}
@@ -59,7 +60,7 @@ func GetInspectionByTaskID(s *inspection.Service) gorouter.Handler {
 			return fmt.Errorf("failed to read task id: %w", err)
 		}
 
-		response, err := s.GetByTaskID(c.Ctx(), vars.TaskID)
+		response, err := s.GetByTaskID(c.Ctx(), vars.TaskID, clusterfile.NewForwardedHeaders(c.Request()))
 		if err != nil {
 			return fmt.Errorf("failed to get inspection by task id: %w", err)
 		}
@@ -96,7 +97,7 @@ func GetInspectionsByBrigade(s *inspection.Service) gorouter.Handler {
 			return fmt.Errorf("failed to read pagination: %w", err)
 		}
 
-		response, err := s.GetByBrigade(c.Ctx(), vars.BrigadeID, pageVars)
+		response, err := s.GetByBrigade(c.Ctx(), vars.BrigadeID, pageVars, clusterfile.NewForwardedHeaders(c.Request()))
 		if err != nil {
 			return fmt.Errorf("failed to get inspections by brigade id: %w", err)
 		}
@@ -127,7 +128,7 @@ func GetInspectionByID(s *inspection.Service) gorouter.Handler {
 			return fmt.Errorf("failed to read inspection id: %w", err)
 		}
 
-		response, err := s.GetByID(c.Ctx(), vars.ID)
+		response, err := s.GetByID(c.Ctx(), vars.ID, clusterfile.NewForwardedHeaders(c.Request()))
 		if err != nil {
 			return fmt.Errorf("failed to get inspection by id: %w", err)
 		}
@@ -222,6 +223,7 @@ func AttachPhotoToInspection(s *inspection.Service) gorouter.Handler {
 			DeviceID:     deviceID,
 			SealID:       sealID,
 			FileHeader:   files[0],
+			FileHeaders:  clusterfile.NewForwardedHeaders(c.Request()),
 		})
 		if err != nil {
 			return fmt.Errorf("failed to attach photo to inspection: %w", err)
@@ -257,7 +259,7 @@ func FinishInspection(s *inspection.Service) gorouter.Handler {
 
 		request.ID = vars.ID
 
-		response, err := s.FinishInspection(c.Ctx(), c.Log().WithTags("FinishInspection"), request)
+		response, err := s.FinishInspection(c.Ctx(), c.Log().WithTags("FinishInspection"), request, clusterfile.NewForwardedHeaders(c.Request()))
 		if err != nil {
 			return fmt.Errorf("failed to finish inspection: %w", err)
 		}

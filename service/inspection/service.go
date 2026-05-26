@@ -45,7 +45,7 @@ func NewService(repository Repository, publisher *Publisher, analyzerService Ana
 	}
 }
 
-func (s *Service) GetAll(ctx goctx.Context, page pagination.Pagination) ([]Inspection, error) {
+func (s *Service) GetAll(ctx goctx.Context, page pagination.Pagination, headers file.ForwardedHeaders) ([]Inspection, error) {
 	if err := page.Validate(); err != nil {
 		return nil, fmt.Errorf("validate pagination: %w", err)
 	}
@@ -55,40 +55,40 @@ func (s *Service) GetAll(ctx goctx.Context, page pagination.Pagination) ([]Inspe
 		return nil, fmt.Errorf("get all inspections: %w", err)
 	}
 
-	if err = s.fillAttachmentFileURLs(ctx, inspections); err != nil {
+	if err = s.fillAttachmentFileURLs(ctx, inspections, headers); err != nil {
 		return nil, fmt.Errorf("fill attachment file urls: %w", err)
 	}
 
 	return inspections, nil
 }
 
-func (s *Service) GetByTaskID(ctx goctx.Context, taskID int) (Inspection, error) {
+func (s *Service) GetByTaskID(ctx goctx.Context, taskID int, headers file.ForwardedHeaders) (Inspection, error) {
 	ins, err := s.repository.GetByTaskID(ctx, taskID)
 	if err != nil {
 		return Inspection{}, fmt.Errorf("get inspection by task id: %w", err)
 	}
 
-	if err = s.fillAttachmentFileURLs(ctx, []Inspection{ins}); err != nil {
+	if err = s.fillAttachmentFileURLs(ctx, []Inspection{ins}, headers); err != nil {
 		return Inspection{}, fmt.Errorf("fill attachment file urls: %w", err)
 	}
 
 	return ins, nil
 }
 
-func (s *Service) GetByID(ctx goctx.Context, id int) (Inspection, error) {
+func (s *Service) GetByID(ctx goctx.Context, id int, headers file.ForwardedHeaders) (Inspection, error) {
 	ins, err := s.repository.GetByID(ctx, id)
 	if err != nil {
 		return Inspection{}, fmt.Errorf("get inspection by id: %w", err)
 	}
 
-	if err = s.fillAttachmentFileURLs(ctx, []Inspection{ins}); err != nil {
+	if err = s.fillAttachmentFileURLs(ctx, []Inspection{ins}, headers); err != nil {
 		return Inspection{}, fmt.Errorf("fill attachment file urls: %w", err)
 	}
 
 	return ins, nil
 }
 
-func (s *Service) GetByBrigade(ctx goctx.Context, brigadeID int, page pagination.Pagination) ([]Inspection, error) {
+func (s *Service) GetByBrigade(ctx goctx.Context, brigadeID int, page pagination.Pagination, headers file.ForwardedHeaders) ([]Inspection, error) {
 	if err := page.Validate(); err != nil {
 		return nil, fmt.Errorf("validate pagination: %w", err)
 	}
@@ -111,14 +111,14 @@ func (s *Service) GetByBrigade(ctx goctx.Context, brigadeID int, page pagination
 		inspections = append(inspections, ins)
 	}
 
-	if err = s.fillAttachmentFileURLs(ctx, inspections); err != nil {
+	if err = s.fillAttachmentFileURLs(ctx, inspections, headers); err != nil {
 		return nil, fmt.Errorf("fill attachment file urls: %w", err)
 	}
 
 	return inspections, nil
 }
 
-func (s *Service) fillAttachmentFileURLs(ctx goctx.Context, inspections []Inspection) error {
+func (s *Service) fillAttachmentFileURLs(ctx goctx.Context, inspections []Inspection, headers file.ForwardedHeaders) error {
 	fileIDs := make([]int, 0)
 	seen := make(map[int]struct{})
 	for _, ins := range inspections {
@@ -136,7 +136,7 @@ func (s *Service) fillAttachmentFileURLs(ctx goctx.Context, inspections []Inspec
 		return nil
 	}
 
-	files, err := s.fileService.GetByIDs(ctx, fileIDs, pagination.Pagination{})
+	files, err := s.fileService.GetByIDs(ctx, fileIDs, pagination.Pagination{}, headers)
 	if err != nil {
 		return fmt.Errorf("get files by ids: %w", err)
 	}
@@ -220,7 +220,7 @@ func (s *Service) AttachPhoto(ctx goctx.Context, log golog.Logger, request Attac
 		filepath.Ext(request.FileHeader.Filename),
 	)
 
-	uploadedFile, err := s.fileService.Upload(ctx, fileName, bytes.NewReader(fileBuffer.Bytes()))
+	uploadedFile, err := s.fileService.Upload(ctx, fileName, bytes.NewReader(fileBuffer.Bytes()), request.FileHeaders)
 	if err != nil {
 		return Attachment{}, fmt.Errorf("upload file: %w", err)
 	}
@@ -273,7 +273,7 @@ func attachmentNumber(request AttachPhotoRequest, object subscriber.Object) (str
 	}
 }
 
-func (s *Service) FinishInspection(ctx goctx.Context, log golog.Logger, request FinishInspectionRequest) (file.File, error) {
+func (s *Service) FinishInspection(ctx goctx.Context, log golog.Logger, request FinishInspectionRequest, headers file.ForwardedHeaders) (file.File, error) {
 	ins, err := s.repository.GetByID(ctx, request.ID)
 	if err != nil {
 		return file.File{}, fmt.Errorf("get inspection by id: %w", err)
@@ -334,7 +334,7 @@ func (s *Service) FinishInspection(ctx goctx.Context, log golog.Logger, request 
 		contract.Object.Address,
 	)
 
-	uploadedFile, err := s.fileService.Upload(ctx, actName, buf)
+	uploadedFile, err := s.fileService.Upload(ctx, actName, buf, headers)
 	if err != nil {
 		return file.File{}, fmt.Errorf("upload file: %w", err)
 	}

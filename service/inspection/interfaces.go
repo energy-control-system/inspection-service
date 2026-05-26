@@ -35,8 +35,8 @@ type SubscriberService interface {
 }
 
 type FileService interface {
-	Upload(ctx goctx.Context, fileName string, file io.Reader) (file.File, error)
-	GetByIDs(ctx goctx.Context, ids []int, page pagination.Pagination) ([]file.File, error)
+	Upload(ctx goctx.Context, fileName string, file io.Reader, headers file.ForwardedHeaders) (file.File, error)
+	GetByIDs(ctx goctx.Context, ids []int, page pagination.Pagination, headers file.ForwardedHeaders) ([]file.File, error)
 }
 
 type TaskService interface {
