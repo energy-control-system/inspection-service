@@ -5,9 +5,12 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"strconv"
 
 	"github.com/sunshineOfficial/golib/goctx"
 	"github.com/sunshineOfficial/golib/gohttp"
+	"github.com/sunshineOfficial/golib/pagination"
 )
 
 type Client struct {
@@ -69,4 +72,29 @@ func (c *Client) Upload(ctx goctx.Context, fileName string, file io.Reader) (Fil
 	}
 
 	return response, nil
+}
+
+func (c *Client) GetByIDs(ctx goctx.Context, ids []int, page pagination.Pagination) ([]File, error) {
+	var response []File
+	status, err := c.client.DoJson(ctx, http.MethodGet, fmt.Sprintf("%s/files?%s", c.baseURL, filesQuery(ids, page)), nil, &response)
+	if err != nil {
+		return nil, fmt.Errorf("c.client.DoJson: %w", err)
+	}
+
+	if status != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code: %d", status)
+	}
+
+	return response, nil
+}
+
+func filesQuery(ids []int, page pagination.Pagination) string {
+	values := make(url.Values)
+	for _, id := range ids {
+		values.Add("id", strconv.Itoa(id))
+	}
+	values.Set("limit", strconv.Itoa(page.Limit))
+	values.Set("offset", strconv.Itoa(page.Offset))
+
+	return values.Encode()
 }

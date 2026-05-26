@@ -3,8 +3,10 @@ package inspection
 import (
 	"context"
 	"database/sql"
+	"io"
 	"testing"
 
+	clusterfile "inspection-service/cluster/file"
 	clustertask "inspection-service/cluster/task"
 
 	"github.com/sunshineOfficial/golib/goctx"
@@ -12,12 +14,13 @@ import (
 )
 
 type repositoryMock struct {
+	inspections         []Inspection
 	inspectionsByTaskID map[int]Inspection
 	inspectionsByID     map[int]Inspection
 }
 
 func (m repositoryMock) GetAll(context.Context, pagination.Pagination) ([]Inspection, error) {
-	return nil, nil
+	return m.inspections, nil
 }
 
 func (m repositoryMock) GetByTaskID(_ context.Context, taskID int) (Inspection, error) {
@@ -73,6 +76,28 @@ func (m *taskServiceMock) GetTasksByBrigade(_ goctx.Context, brigadeID int, page
 	return m.tasksByBrigadeID[brigadeID], nil
 }
 
+type fileServiceMock struct {
+	filesByID map[int]clusterfile.File
+	gotIDs    []int
+}
+
+func (m *fileServiceMock) Upload(goctx.Context, string, io.Reader) (clusterfile.File, error) {
+	return clusterfile.File{}, nil
+}
+
+func (m *fileServiceMock) GetByIDs(_ goctx.Context, ids []int, page pagination.Pagination) ([]clusterfile.File, error) {
+	m.gotIDs = append([]int(nil), ids...)
+
+	files := make([]clusterfile.File, 0, len(ids))
+	for _, id := range ids {
+		if f, ok := m.filesByID[id]; ok {
+			files = append(files, f)
+		}
+	}
+
+	return files, nil
+}
+
 func TestGetByBrigadeReturnsInspectionsForBrigadeTasks(t *testing.T) {
 	taskService := &taskServiceMock{
 		tasksByBrigadeID: map[int][]clustertask.Task{
@@ -92,6 +117,7 @@ func TestGetByBrigadeReturnsInspectionsForBrigadeTasks(t *testing.T) {
 			},
 		},
 		taskService: taskService,
+		fileService: &fileServiceMock{},
 	}
 
 	page := pagination.Pagination{Limit: 2, Offset: 4}
@@ -114,13 +140,73 @@ func TestGetByBrigadeReturnsInspectionsForBrigadeTasks(t *testing.T) {
 	}
 }
 
+func TestGetAllReturnsAttachmentFileURLs(t *testing.T) {
+	fileService := &fileServiceMock{
+		filesByID: map[int]clusterfile.File{
+			70: {ID: 70, URL: "https://example.test/storage/photo.jpg"},
+			80: {ID: 80, URL: "https://example.test/storage/act.docx"},
+		},
+	}
+
+	service := &Service{
+		repository: repositoryMock{
+			inspections: []Inspection{
+				{
+					ID:     42,
+					TaskID: 7,
+					Attachments: []Attachment{
+						{ID: 100, InspectionID: 42, FileID: 70, Type: AttachmentTypeDevicePhoto},
+					},
+				},
+				{
+					ID:     43,
+					TaskID: 8,
+					Attachments: []Attachment{
+						{ID: 101, InspectionID: 43, FileID: 80, Type: AttachmentTypeAct},
+					},
+				},
+			},
+		},
+		fileService: fileService,
+	}
+
+	got, err := service.GetAll(goctx.Wrap(context.Background()), pagination.Pagination{})
+	if err != nil {
+		t.Fatalf("GetAll returned error: %v", err)
+	}
+
+	if got[0].Attachments[0].FileURL != "https://example.test/storage/photo.jpg" {
+		t.Fatalf("got[0].Attachments[0].FileURL = %q, want %q", got[0].Attachments[0].FileURL, "https://example.test/storage/photo.jpg")
+	}
+	if got[1].Attachments[0].FileURL != "https://example.test/storage/act.docx" {
+		t.Fatalf("got[1].Attachments[0].FileURL = %q, want %q", got[1].Attachments[0].FileURL, "https://example.test/storage/act.docx")
+	}
+	if len(fileService.gotIDs) != 2 || fileService.gotIDs[0] != 70 || fileService.gotIDs[1] != 80 {
+		t.Fatalf("fileService.gotIDs = %+v, want [70 80]", fileService.gotIDs)
+	}
+}
+
 func TestGetByIDReturnsInspection(t *testing.T) {
+	fileService := &fileServiceMock{
+		filesByID: map[int]clusterfile.File{
+			70: {ID: 70, URL: "https://example.test/storage/photo.jpg"},
+		},
+	}
+
 	service := &Service{
 		repository: repositoryMock{
 			inspectionsByID: map[int]Inspection{
-				42: {ID: 42, TaskID: 7, Status: StatusInWork},
+				42: {
+					ID:     42,
+					TaskID: 7,
+					Status: StatusInWork,
+					Attachments: []Attachment{
+						{ID: 100, InspectionID: 42, FileID: 70, Type: AttachmentTypeDevicePhoto},
+					},
+				},
 			},
 		},
+		fileService: fileService,
 	}
 
 	got, err := service.GetByID(goctx.Wrap(context.Background()), 42)
@@ -136,5 +222,11 @@ func TestGetByIDReturnsInspection(t *testing.T) {
 	}
 	if got.Status != StatusInWork {
 		t.Fatalf("got.Status = %d, want %d", got.Status, StatusInWork)
+	}
+	if got.Attachments[0].FileURL != "https://example.test/storage/photo.jpg" {
+		t.Fatalf("got.Attachments[0].FileURL = %q, want %q", got.Attachments[0].FileURL, "https://example.test/storage/photo.jpg")
+	}
+	if len(fileService.gotIDs) != 1 || fileService.gotIDs[0] != 70 {
+		t.Fatalf("fileService.gotIDs = %+v, want [70]", fileService.gotIDs)
 	}
 }

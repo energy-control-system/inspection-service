@@ -92,6 +92,7 @@ type Attachment struct {
 	InspectionID int            `json:"InspectionID"`
 	Type         AttachmentType `json:"Type"`
 	FileID       int            `json:"FileID"`
+	FileURL      string         `json:"FileURL"`
 	CreatedAt    time.Time      `json:"CreatedAt"`
 }
 

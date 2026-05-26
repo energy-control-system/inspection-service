@@ -35,6 +35,9 @@ const docTemplate = `{
                     "FileID": {
                         "type": "integer"
                     },
+                    "FileURL": {
+                        "type": "string"
+                    },
                     "ID": {
                         "type": "integer"
                     },

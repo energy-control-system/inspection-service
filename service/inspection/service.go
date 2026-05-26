@@ -55,6 +55,10 @@ func (s *Service) GetAll(ctx goctx.Context, page pagination.Pagination) ([]Inspe
 		return nil, fmt.Errorf("get all inspections: %w", err)
 	}
 
+	if err = s.fillAttachmentFileURLs(ctx, inspections); err != nil {
+		return nil, fmt.Errorf("fill attachment file urls: %w", err)
+	}
+
 	return inspections, nil
 }
 
@@ -64,6 +68,10 @@ func (s *Service) GetByTaskID(ctx goctx.Context, taskID int) (Inspection, error)
 		return Inspection{}, fmt.Errorf("get inspection by task id: %w", err)
 	}
 
+	if err = s.fillAttachmentFileURLs(ctx, []Inspection{ins}); err != nil {
+		return Inspection{}, fmt.Errorf("fill attachment file urls: %w", err)
+	}
+
 	return ins, nil
 }
 
@@ -71,6 +79,10 @@ func (s *Service) GetByID(ctx goctx.Context, id int) (Inspection, error) {
 	ins, err := s.repository.GetByID(ctx, id)
 	if err != nil {
 		return Inspection{}, fmt.Errorf("get inspection by id: %w", err)
+	}
+
+	if err = s.fillAttachmentFileURLs(ctx, []Inspection{ins}); err != nil {
+		return Inspection{}, fmt.Errorf("fill attachment file urls: %w", err)
 	}
 
 	return ins, nil
@@ -99,7 +111,54 @@ func (s *Service) GetByBrigade(ctx goctx.Context, brigadeID int, page pagination
 		inspections = append(inspections, ins)
 	}
 
+	if err = s.fillAttachmentFileURLs(ctx, inspections); err != nil {
+		return nil, fmt.Errorf("fill attachment file urls: %w", err)
+	}
+
 	return inspections, nil
+}
+
+func (s *Service) fillAttachmentFileURLs(ctx goctx.Context, inspections []Inspection) error {
+	fileIDs := make([]int, 0)
+	seen := make(map[int]struct{})
+	for _, ins := range inspections {
+		for _, attachment := range ins.Attachments {
+			if _, ok := seen[attachment.FileID]; ok {
+				continue
+			}
+
+			seen[attachment.FileID] = struct{}{}
+			fileIDs = append(fileIDs, attachment.FileID)
+		}
+	}
+
+	if len(fileIDs) == 0 {
+		return nil
+	}
+
+	files, err := s.fileService.GetByIDs(ctx, fileIDs, pagination.Pagination{})
+	if err != nil {
+		return fmt.Errorf("get files by ids: %w", err)
+	}
+
+	urlsByID := make(map[int]string, len(files))
+	for _, f := range files {
+		urlsByID[f.ID] = f.URL
+	}
+
+	for i := range inspections {
+		for j := range inspections[i].Attachments {
+			fileID := inspections[i].Attachments[j].FileID
+			fileURL, ok := urlsByID[fileID]
+			if !ok {
+				return fmt.Errorf("file %d not found", fileID)
+			}
+
+			inspections[i].Attachments[j].FileURL = fileURL
+		}
+	}
+
+	return nil
 }
 
 func (s *Service) AttachPhoto(ctx goctx.Context, log golog.Logger, request AttachPhotoRequest) (Attachment, error) {
@@ -170,6 +229,8 @@ func (s *Service) AttachPhoto(ctx goctx.Context, log golog.Logger, request Attac
 	if err != nil {
 		return Attachment{}, fmt.Errorf("add attachment: %w", err)
 	}
+
+	attachment.FileURL = uploadedFile.URL
 
 	return attachment, nil
 }
