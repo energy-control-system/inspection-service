@@ -45,12 +45,15 @@ func NewService(repository Repository, publisher *Publisher, analyzerService Ana
 	}
 }
 
-func (s *Service) GetAll(ctx goctx.Context, page pagination.Pagination, headers file.ForwardedHeaders) ([]Inspection, error) {
+func (s *Service) GetAll(ctx goctx.Context, page pagination.Pagination, sort SortDirection, headers file.ForwardedHeaders) ([]Inspection, error) {
 	if err := page.Validate(); err != nil {
 		return nil, fmt.Errorf("validate pagination: %w", err)
 	}
+	if err := sort.Validate(); err != nil {
+		return nil, fmt.Errorf("validate sort: %w", err)
+	}
 
-	inspections, err := s.repository.GetAll(ctx, page)
+	inspections, err := s.repository.GetAll(ctx, page, sort)
 	if err != nil {
 		return nil, fmt.Errorf("get all inspections: %w", err)
 	}

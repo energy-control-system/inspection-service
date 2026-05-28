@@ -17,9 +17,13 @@ type repositoryMock struct {
 	inspections         []Inspection
 	inspectionsByTaskID map[int]Inspection
 	inspectionsByID     map[int]Inspection
+	gotSort             SortDirection
+	getAllCalled        bool
 }
 
-func (m repositoryMock) GetAll(context.Context, pagination.Pagination) ([]Inspection, error) {
+func (m *repositoryMock) GetAll(_ context.Context, _ pagination.Pagination, sort SortDirection) ([]Inspection, error) {
+	m.getAllCalled = true
+	m.gotSort = sort
 	return m.inspections, nil
 }
 
@@ -112,7 +116,7 @@ func TestGetByBrigadeReturnsInspectionsForBrigadeTasks(t *testing.T) {
 	}
 
 	service := &Service{
-		repository: repositoryMock{
+		repository: &repositoryMock{
 			inspectionsByTaskID: map[int]Inspection{
 				10: {ID: 100, TaskID: 10},
 				30: {ID: 300, TaskID: 30},
@@ -151,7 +155,7 @@ func TestGetAllReturnsAttachmentFileURLs(t *testing.T) {
 	}
 
 	service := &Service{
-		repository: repositoryMock{
+		repository: &repositoryMock{
 			inspections: []Inspection{
 				{
 					ID:     42,
@@ -173,7 +177,7 @@ func TestGetAllReturnsAttachmentFileURLs(t *testing.T) {
 	}
 
 	headers := clusterfile.ForwardedHeaders{Host: "api.example.test", Proto: "https"}
-	got, err := service.GetAll(goctx.Wrap(context.Background()), pagination.Pagination{}, headers)
+	got, err := service.GetAll(goctx.Wrap(context.Background()), pagination.Pagination{}, SortDirection(""), headers)
 	if err != nil {
 		t.Fatalf("GetAll returned error: %v", err)
 	}
@@ -200,7 +204,7 @@ func TestGetByIDReturnsInspection(t *testing.T) {
 	}
 
 	service := &Service{
-		repository: repositoryMock{
+		repository: &repositoryMock{
 			inspectionsByID: map[int]Inspection{
 				42: {
 					ID:     42,
@@ -238,5 +242,38 @@ func TestGetByIDReturnsInspection(t *testing.T) {
 	}
 	if fileService.gotHeaders != headers {
 		t.Fatalf("fileService.gotHeaders = %+v, want %+v", fileService.gotHeaders, headers)
+	}
+}
+
+func TestGetAllPassesSortToRepository(t *testing.T) {
+	repository := &repositoryMock{inspections: []Inspection{{ID: 42}}}
+	service := &Service{
+		repository:  repository,
+		fileService: &fileServiceMock{},
+	}
+
+	_, err := service.GetAll(goctx.Wrap(context.Background()), pagination.Pagination{}, SortDesc, clusterfile.ForwardedHeaders{})
+	if err != nil {
+		t.Fatalf("GetAll returned error: %v", err)
+	}
+
+	if repository.gotSort != SortDesc {
+		t.Fatalf("repository sort = %q, want %q", repository.gotSort, SortDesc)
+	}
+}
+
+func TestGetAllRejectsInvalidSort(t *testing.T) {
+	repository := &repositoryMock{}
+	service := &Service{
+		repository:  repository,
+		fileService: &fileServiceMock{},
+	}
+
+	_, err := service.GetAll(goctx.Wrap(context.Background()), pagination.Pagination{}, SortDirection("newest"), clusterfile.ForwardedHeaders{})
+	if err == nil {
+		t.Fatal("GetAll returned nil error, want invalid sort error")
+	}
+	if repository.getAllCalled {
+		t.Fatal("repository.GetAll was called for invalid sort")
 	}
 }

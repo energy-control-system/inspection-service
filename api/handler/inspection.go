@@ -18,23 +18,37 @@ import (
 // @Produce json
 // @Param limit query int false "Maximum number of items to return; 0 means no limit"
 // @Param offset query int false "Number of items to skip"
+// @Param sort query string false "Sort by InspectAt direction: asc or desc"
 // @Success 200 {array} inspection.Inspection
 // @Failure 400 {object} gorouter.ErrorResponse
 // @Failure 500 {object} gorouter.ErrorResponse
 // @Router /inspections [get]
 func GetAllInspections(s *inspection.Service) gorouter.Handler {
 	return func(c gorouter.Context) error {
-		var vars pagination.Pagination
+		var vars inspectionListQueryVars
 		if err := c.Vars(&vars); err != nil {
-			return fmt.Errorf("failed to read pagination: %w", err)
+			return fmt.Errorf("failed to read query params: %w", err)
 		}
 
-		response, err := s.GetAll(c.Ctx(), vars, clusterfile.NewForwardedHeaders(c.Request()))
+		response, err := s.GetAll(c.Ctx(), vars.Pagination(), vars.Sort, clusterfile.NewForwardedHeaders(c.Request()))
 		if err != nil {
 			return fmt.Errorf("failed to get all inspections: %w", err)
 		}
 
 		return c.WriteJson(http.StatusOK, response)
+	}
+}
+
+type inspectionListQueryVars struct {
+	Limit  int                      `query:"limit"`
+	Offset int                      `query:"offset"`
+	Sort   inspection.SortDirection `query:"sort"`
+}
+
+func (v inspectionListQueryVars) Pagination() pagination.Pagination {
+	return pagination.Pagination{
+		Limit:  v.Limit,
+		Offset: v.Offset,
 	}
 }
 

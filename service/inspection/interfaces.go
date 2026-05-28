@@ -14,7 +14,7 @@ import (
 )
 
 type Repository interface {
-	GetAll(ctx context.Context, page pagination.Pagination) ([]Inspection, error)
+	GetAll(ctx context.Context, page pagination.Pagination, sort SortDirection) ([]Inspection, error)
 	GetByTaskID(ctx context.Context, taskID int) (Inspection, error)
 	AddAttachment(ctx context.Context, inspectionID, fileID int, attachmentType AttachmentType) (Attachment, error)
 	GetByID(ctx context.Context, id int) (Inspection, error)

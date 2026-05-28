@@ -1,6 +1,7 @@
 package inspection
 
 import (
+	"fmt"
 	"inspection-service/cluster/file"
 	"mime/multipart"
 	"time"
@@ -77,6 +78,22 @@ type Inspection struct {
 	Attachments             []Attachment      `json:"Attachments"`
 	CreatedAt               time.Time         `json:"CreatedAt"`
 	UpdatedAt               time.Time         `json:"UpdatedAt"`
+}
+
+type SortDirection string
+
+const (
+	SortAsc  SortDirection = "asc"
+	SortDesc SortDirection = "desc"
+)
+
+func (s SortDirection) Validate() error {
+	switch s {
+	case "", SortAsc, SortDesc:
+		return nil
+	default:
+		return fmt.Errorf("sort must be empty, %q, or %q", SortAsc, SortDesc)
+	}
 }
 
 type AttachmentType int

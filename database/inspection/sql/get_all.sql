@@ -20,5 +20,8 @@ select id,
        created_at,
        updated_at
 from inspections
-order by id
-limit $1 offset $2;
+order by
+    case when $1 = 'asc' then inspect_at end asc nulls last,
+    case when $1 = 'desc' then inspect_at end desc nulls last,
+    id
+limit $2 offset $3;

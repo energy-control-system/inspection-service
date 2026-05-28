@@ -368,6 +368,14 @@ const docTemplate = `{
                         "schema": {
                             "type": "integer"
                         }
+                    },
+                    {
+                        "description": "Sort by InspectAt direction: asc or desc",
+                        "in": "query",
+                        "name": "sort",
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 ],
                 "responses": {

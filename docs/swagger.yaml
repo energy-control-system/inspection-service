@@ -253,6 +253,11 @@ paths:
         name: offset
         schema:
           type: integer
+      - description: 'Sort by InspectAt direction: asc or desc'
+        in: query
+        name: sort
+        schema:
+          type: string
       responses:
         "200":
           content:

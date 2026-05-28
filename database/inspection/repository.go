@@ -24,9 +24,9 @@ func NewRepository(db *sqlx.DB) *Repository {
 //go:embed sql/get_all.sql
 var getAllSQL string
 
-func (r *Repository) GetAll(ctx context.Context, page pagination.Pagination) ([]inspection.Inspection, error) {
+func (r *Repository) GetAll(ctx context.Context, page pagination.Pagination, sort inspection.SortDirection) ([]inspection.Inspection, error) {
 	var inspections []Inspection
-	err := r.db.SelectContext(ctx, &inspections, getAllSQL, page.LimitArg(), page.Offset)
+	err := r.db.SelectContext(ctx, &inspections, getAllSQL, sort, page.LimitArg(), page.Offset)
 	if err != nil {
 		return nil, fmt.Errorf("r.db.SelectContext: %w", err)
 	}
