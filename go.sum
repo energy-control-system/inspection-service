@@ -161,8 +161,8 @@ github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UV
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu7U=
 github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
-github.com/sunshineOfficial/golib v0.0.23 h1:fgPzgD1PPjNb0cJWtlUA9AWEvtDT/ak5V3CbyuY8hig=
-github.com/sunshineOfficial/golib v0.0.23/go.mod h1:Ucwn2c6wXhGhHLoriiX0a7vgC7gx5aucfRVm0Y2IKYE=
+github.com/sunshineOfficial/golib v0.0.24 h1:xccxdebSGvcNmyOPpoYTO2ZfUhKYGutU/BIgTB02ZwE=
+github.com/sunshineOfficial/golib v0.0.24/go.mod h1:Ucwn2c6wXhGhHLoriiX0a7vgC7gx5aucfRVm0Y2IKYE=
 github.com/sv-tools/openapi v0.4.0 h1:UhD9DVnGox1hfTePNclpUzUFgos57FvzT2jmcAuTOJ4=
 github.com/sv-tools/openapi v0.4.0/go.mod h1:kD/dG+KP0+Fom1r6nvcj/ORtLus8d8enXT6dyRZDirE=
 github.com/swaggo/swag/v2 v2.0.0-rc5 h1:fK7d6ET9rrEsdB8IyuwXREWMcyQN3N7gawGFbbrjgHk=

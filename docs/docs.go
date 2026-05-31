@@ -337,6 +337,14 @@ const docTemplate = `{
                 },
                 "type": "object"
             }
+        },
+        "securitySchemes": {
+            "bearer": {
+                "description": "JWT authorization header. Use Bearer \u003ctoken\u003e.",
+                "in": "header",
+                "name": "Authorization",
+                "type": "apiKey"
+            }
         }
     },
     "info": {
@@ -413,6 +421,11 @@ const docTemplate = `{
                         "description": "Internal Server Error"
                     }
                 },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
                 "summary": "List inspections",
                 "tags": [
                     "inspections"
@@ -484,6 +497,11 @@ const docTemplate = `{
                         "description": "Internal Server Error"
                     }
                 },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
                 "summary": "List brigade inspections",
                 "tags": [
                     "inspections"
@@ -608,6 +626,11 @@ const docTemplate = `{
                         "description": "Internal Server Error"
                     }
                 },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
                 "summary": "Get inspection by ID",
                 "tags": [
                     "inspections"
@@ -683,6 +706,11 @@ const docTemplate = `{
                         "description": "Internal Server Error"
                     }
                 },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
                 "summary": "Finish inspection",
                 "tags": [
                     "inspections"
@@ -777,6 +805,11 @@ const docTemplate = `{
                         "description": "Internal Server Error"
                     }
                 },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
                 "summary": "Attach inspection photo",
                 "tags": [
                     "inspections"
