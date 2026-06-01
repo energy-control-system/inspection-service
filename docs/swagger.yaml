@@ -230,12 +230,6 @@ components:
         SealID:
           type: integer
       type: object
-  securitySchemes:
-    bearer:
-      description: JWT authorization header. Use Bearer <token>.
-      in: header
-      name: Authorization
-      type: apiKey
 externalDocs:
   description: ""
   url: ""
@@ -285,8 +279,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/gorouter.ErrorResponse'
           description: Internal Server Error
-      security:
-      - bearer: []
       summary: List inspections
       tags:
       - inspections
@@ -325,8 +317,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/gorouter.ErrorResponse'
           description: Internal Server Error
-      security:
-      - bearer: []
       summary: Get inspection by ID
       tags:
       - inspections
@@ -374,8 +364,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/gorouter.ErrorResponse'
           description: Internal Server Error
-      security:
-      - bearer: []
       summary: Finish inspection
       tags:
       - inspections
@@ -433,8 +421,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/gorouter.ErrorResponse'
           description: Internal Server Error
-      security:
-      - bearer: []
       summary: Attach inspection photo
       tags:
       - inspections
@@ -479,8 +465,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/gorouter.ErrorResponse'
           description: Internal Server Error
-      security:
-      - bearer: []
       summary: List brigade inspections
       tags:
       - inspections

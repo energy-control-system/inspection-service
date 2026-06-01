@@ -22,7 +22,6 @@ import (
 // @Success 200 {array} inspection.Inspection
 // @Failure 400 {object} gorouter.ErrorResponse
 // @Failure 500 {object} gorouter.ErrorResponse
-// @Security bearer
 // @Router /inspections [get]
 func GetAllInspections(s *inspection.Service) gorouter.Handler {
 	return func(c gorouter.Context) error {
@@ -99,7 +98,6 @@ type brigadeIDVars struct {
 // @Success 200 {array} inspection.Inspection
 // @Failure 400 {object} gorouter.ErrorResponse
 // @Failure 500 {object} gorouter.ErrorResponse
-// @Security bearer
 // @Router /inspections/brigades/{brigadeID} [get]
 func GetInspectionsByBrigade(s *inspection.Service) gorouter.Handler {
 	return func(c gorouter.Context) error {
@@ -136,7 +134,6 @@ type inspectionIDVars struct {
 // @Failure 400 {object} gorouter.ErrorResponse
 // @Failure 404 {object} gorouter.ErrorResponse
 // @Failure 500 {object} gorouter.ErrorResponse
-// @Security bearer
 // @Router /inspections/{id} [get]
 func GetInspectionByID(s *inspection.Service) gorouter.Handler {
 	return func(c gorouter.Context) error {
@@ -169,7 +166,6 @@ func GetInspectionByID(s *inspection.Service) gorouter.Handler {
 // @Failure 400 {object} gorouter.ErrorResponse
 // @Failure 404 {object} gorouter.ErrorResponse
 // @Failure 500 {object} gorouter.ErrorResponse
-// @Security bearer
 // @Router /inspections/{id}/photo [post]
 func AttachPhotoToInspection(s *inspection.Service) gorouter.Handler {
 	return func(c gorouter.Context) error {
@@ -262,7 +258,6 @@ func AttachPhotoToInspection(s *inspection.Service) gorouter.Handler {
 // @Failure 400 {object} gorouter.ErrorResponse
 // @Failure 404 {object} gorouter.ErrorResponse
 // @Failure 500 {object} gorouter.ErrorResponse
-// @Security bearer
 // @Router /inspections/{id}/finish [patch]
 func FinishInspection(s *inspection.Service) gorouter.Handler {
 	return func(c gorouter.Context) error {

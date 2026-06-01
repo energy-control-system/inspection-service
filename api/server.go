@@ -10,7 +10,6 @@ import (
 	"github.com/sunshineOfficial/golib/gohttp/gorouter"
 	"github.com/sunshineOfficial/golib/gohttp/gorouter/middleware"
 	"github.com/sunshineOfficial/golib/gohttp/gorouter/plugin"
-	"github.com/sunshineOfficial/golib/gohttp/gorouter/status"
 	"github.com/sunshineOfficial/golib/gohttp/goserver"
 	"github.com/sunshineOfficial/golib/golog"
 )
@@ -18,7 +17,6 @@ import (
 type ServerBuilder struct {
 	server goserver.Server
 	router *gorouter.Router
-	auth   gorouter.Middleware
 }
 
 func NewServerBuilder(ctx context.Context, log golog.Logger, settings config.Settings) *ServerBuilder {
@@ -29,7 +27,6 @@ func NewServerBuilder(ctx context.Context, log golog.Logger, settings config.Set
 			middleware.Recover,
 			middleware.LogError,
 		),
-		auth: middleware.IsAnyAuthorized(status.UnauthorizedHandler),
 	}
 }
 
@@ -39,12 +36,12 @@ func (s *ServerBuilder) AddDebug() {
 
 func (s *ServerBuilder) AddInspections(service *inspection.Service) {
 	r := s.router.SubRouter("/inspections")
-	r.HandleGet("", handler.GetAllInspections(service)).Use(s.auth)
-	r.HandleGet("/{id}", handler.GetInspectionByID(service)).Use(s.auth)
+	r.HandleGet("", handler.GetAllInspections(service))
+	r.HandleGet("/{id}", handler.GetInspectionByID(service))
 	r.HandleGet("/task/{taskID}", handler.GetInspectionByTaskID(service))
-	r.HandleGet("/brigades/{brigadeID}", handler.GetInspectionsByBrigade(service)).Use(s.auth)
-	r.HandlePost("/{id}/photo", handler.AttachPhotoToInspection(service)).Use(s.auth)
-	r.HandlePatch("/{id}/finish", handler.FinishInspection(service)).Use(s.auth)
+	r.HandleGet("/brigades/{brigadeID}", handler.GetInspectionsByBrigade(service))
+	r.HandlePost("/{id}/photo", handler.AttachPhotoToInspection(service))
+	r.HandlePatch("/{id}/finish", handler.FinishInspection(service))
 }
 
 func (s *ServerBuilder) Build() goserver.Server {

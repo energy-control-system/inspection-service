@@ -9,31 +9,34 @@ import (
 	"github.com/sunshineOfficial/golib/golog"
 )
 
-func TestInspectionAuthorizationPolicy(t *testing.T) {
+func TestInspectionRoutesAllowUnauthenticatedRequests(t *testing.T) {
 	builder := NewServerBuilder(t.Context(), golog.NewLogger("test"), config.Settings{
 		Port: 80,
 	})
 	builder.AddInspections(nil)
 
-	t.Run("attach photo requires authorization", func(t *testing.T) {
-		response := httptest.NewRecorder()
-		request := httptest.NewRequest(http.MethodPost, "/inspections/1/photo", nil)
+	routes := []struct {
+		method string
+		path   string
+	}{
+		{method: http.MethodGet, path: "/inspections"},
+		{method: http.MethodGet, path: "/inspections/1"},
+		{method: http.MethodGet, path: "/inspections/task/1"},
+		{method: http.MethodGet, path: "/inspections/brigades/1"},
+		{method: http.MethodPost, path: "/inspections/1/photo"},
+		{method: http.MethodPatch, path: "/inspections/1/finish"},
+	}
 
-		builder.router.ServeHTTP(response, request)
+	for _, route := range routes {
+		t.Run(route.method+" "+route.path, func(t *testing.T) {
+			response := httptest.NewRecorder()
+			request := httptest.NewRequest(route.method, route.path, nil)
 
-		if response.Code != http.StatusUnauthorized {
-			t.Fatalf("status = %d, want %d", response.Code, http.StatusUnauthorized)
-		}
-	})
+			builder.router.ServeHTTP(response, request)
 
-	t.Run("get by task id allows internal calls without authorization", func(t *testing.T) {
-		response := httptest.NewRecorder()
-		request := httptest.NewRequest(http.MethodGet, "/inspections/task/1", nil)
-
-		builder.router.ServeHTTP(response, request)
-
-		if response.Code == http.StatusUnauthorized {
-			t.Fatalf("status = %d, route must stay open for internal service calls", response.Code)
-		}
-	})
+			if response.Code == http.StatusUnauthorized {
+				t.Fatalf("status = %d, route must be open without authorization", response.Code)
+			}
+		})
+	}
 }

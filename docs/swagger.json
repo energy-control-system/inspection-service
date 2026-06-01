@@ -330,14 +330,6 @@
                 },
                 "type": "object"
             }
-        },
-        "securitySchemes": {
-            "bearer": {
-                "description": "JWT authorization header. Use Bearer \u003ctoken\u003e.",
-                "in": "header",
-                "name": "Authorization",
-                "type": "apiKey"
-            }
         }
     },
     "info": {
@@ -414,11 +406,6 @@
                         "description": "Internal Server Error"
                     }
                 },
-                "security": [
-                    {
-                        "bearer": []
-                    }
-                ],
                 "summary": "List inspections",
                 "tags": [
                     "inspections"
@@ -490,11 +477,6 @@
                         "description": "Internal Server Error"
                     }
                 },
-                "security": [
-                    {
-                        "bearer": []
-                    }
-                ],
                 "summary": "List brigade inspections",
                 "tags": [
                     "inspections"
@@ -619,11 +601,6 @@
                         "description": "Internal Server Error"
                     }
                 },
-                "security": [
-                    {
-                        "bearer": []
-                    }
-                ],
                 "summary": "Get inspection by ID",
                 "tags": [
                     "inspections"
@@ -699,11 +676,6 @@
                         "description": "Internal Server Error"
                     }
                 },
-                "security": [
-                    {
-                        "bearer": []
-                    }
-                ],
                 "summary": "Finish inspection",
                 "tags": [
                     "inspections"
@@ -798,11 +770,6 @@
                         "description": "Internal Server Error"
                     }
                 },
-                "security": [
-                    {
-                        "bearer": []
-                    }
-                ],
                 "summary": "Attach inspection photo",
                 "tags": [
                     "inspections"
