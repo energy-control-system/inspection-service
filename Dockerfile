@@ -5,8 +5,16 @@ FROM golang:1.26.3 AS build
 WORKDIR /build
 COPY go.mod go.sum ./
 
-# Скачиваем зависимости (кешируется между BuildKit-сборками)
+ENV GOPRIVATE=github.com/sunshineOfficial/* \
+    GONOSUMDB=github.com/sunshineOfficial/*
+
+# Скачиваем зависимости (кешируется между BuildKit-сборками). Для приватного
+# github.com/sunshineOfficial/golib передайте BuildKit secret github_token.
 RUN --mount=type=cache,id=go-mod-cache,target=/go/pkg/mod \
+    --mount=type=secret,id=github_token,required=true \
+    GITHUB_TOKEN="$(cat /run/secrets/github_token)" && \
+    git config --global url."https://x-access-token:${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/" && \
+    trap 'git config --global --unset-all url."https://x-access-token:${GITHUB_TOKEN}@github.com/".insteadOf || true' EXIT && \
     go mod download
 
 COPY . .
